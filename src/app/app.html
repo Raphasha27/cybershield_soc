@@ -1,0 +1,331 @@
+<!-- Header -->
+<header class="header">
+  <div class="header-content">
+    <div class="logo-section">
+      <div class="logo-icon">🛡️</div>
+      <div class="logo-text">
+        <h1>CyberShield</h1>
+        <span class="logo-subtitle">Security Operations Center</span>
+      </div>
+    </div>
+    
+    <nav class="main-nav">
+      <button class="nav-btn" [class.active]="currentView() === 'dashboard'" (click)="setView('dashboard')">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'threats'" (click)="setView('threats')">
+        <span class="nav-icon">⚠️</span>
+        Threats
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'incidents'" (click)="setView('incidents')">
+        <span class="nav-icon">🚨</span>
+        Incidents
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'vulnerabilities'" (click)="setView('vulnerabilities')">
+        <span class="nav-icon">🔍</span>
+        Vulnerabilities
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'compliance'" (click)="setView('compliance')">
+        <span class="nav-icon">📋</span>
+        Compliance
+      </button>
+    </nav>
+    
+    <div class="header-actions">
+      <div class="search-bar">
+        <input type="text" placeholder="Search security events...">
+        <span class="search-icon">🔎</span>
+      </div>
+      <button class="alert-btn" (click)="toggleAlertPanel()">
+        <span class="alert-icon">🔔</span>
+        <span class="alert-badge">12</span>
+      </button>
+      <div class="user-profile">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="Admin">
+        <span class="user-name">Admin</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="main-content">
+  
+  <!-- Dashboard View -->
+  @if (currentView() === 'dashboard') {
+    <section class="view active">
+      <div class="threat-banner">
+        <div class="threat-banner-content">
+          <div class="threat-level">
+            <span class="threat-icon">⚡</span>
+            <div class="threat-info">
+              <h3>Current Threat Level: <span class="threat-status" [style.color]="threatLevel() > 70 ? 'var(--color-critical)' : 'var(--color-warning)'">
+                {{ threatLevel() > 80 ? 'CRITICAL' : (threatLevel() > 60 ? 'ELEVATED' : 'MODERATE') }} ({{ threatLevel().toFixed(1) }}%)
+              </span></h3>
+              <p>Real-time heuristic analysis active</p>
+            </div>
+          </div>
+          <div class="threat-gauge">
+            <div class="gauge-fill" [style.width.%]="threatLevel()" [class.high]="threatLevel() > 70"></div>
+          </div>
+          <button class="action-btn primary">View Details</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card critical">
+          <div class="metric-header"><span class="metric-icon">🔴</span><h4>Critical Alerts</h4></div>
+          <div class="metric-value"><span class="value">23</span><span class="trend up">+12%</span></div>
+          <div class="metric-footer"><span class="metric-label">Last 24 hours</span></div>
+        </div>
+        <div class="metric-card warning">
+          <div class="metric-header"><span class="metric-icon">🟡</span><h4>Active Incidents</h4></div>
+          <div class="metric-value"><span class="value">47</span><span class="trend down">-8%</span></div>
+          <div class="metric-footer"><span class="metric-label">Requiring attention</span></div>
+        </div>
+        <div class="metric-card info">
+          <div class="metric-header"><span class="metric-icon">🔵</span><h4>Vulnerabilities</h4></div>
+          <div class="metric-value"><span class="value">156</span><span class="trend up">+5%</span></div>
+          <div class="metric-footer"><span class="metric-label">Unpatched systems</span></div>
+        </div>
+        <div class="metric-card success">
+          <div class="metric-header"><span class="metric-icon">🟢</span><h4>Systems Protected</h4></div>
+          <div class="metric-value"><span class="value">1,247</span><span class="trend neutral">0%</span></div>
+          <div class="metric-footer"><span class="metric-label">Network devices</span></div>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card large">
+          <div class="card-header">
+            <h3>Threat Activity Timeline</h3>
+            <div class="chart-controls">
+              <button class="chart-btn active">24H</button>
+              <button class="chart-btn">7D</button>
+              <button class="chart-btn">30D</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="threatTimelineChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card medium">
+          <div class="card-header"><h3>Attack Sources</h3></div>
+          <div class="attack-sources">
+            <div class="source-item">
+              <span class="country-flag">🇨🇳</span>
+              <span class="country-name">China</span>
+              <div class="source-bar"><div class="bar-fill" style="width: 78%"></div></div>
+              <span class="source-count">2,847</span>
+            </div>
+            <div class="source-item">
+              <span class="country-flag">🇷🇺</span>
+              <span class="country-name">Russia</span>
+              <div class="source-bar"><div class="bar-fill" style="width: 65%"></div></div>
+              <span class="source-count">2,341</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dual-section">
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Recent Security Incidents</h3>
+            <button class="view-all-btn">View All →</button>
+          </div>
+          <div class="incidents-list">
+            @for (inc of incidents().slice(0, 5); track inc.id) {
+              <div class="incident-item" [class]="inc.severity" (click)="openIncident(inc)">
+                <div class="incident-header">
+                  <span class="incident-title">{{inc.type}}</span>
+                  <span class="incident-time">{{inc.time}}</span>
+                </div>
+                <p class="incident-description">{{inc.id}}: {{inc.description}}</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="card-header">
+            <h3>Network Traffic Monitor</h3>
+            <span class="live-indicator">🔴 LIVE</span>
+          </div>
+          <div class="traffic-visualization">
+             <canvas id="networkTrafficChart"></canvas>
+          </div>
+          <div class="traffic-stats">
+            <div class="stat-item"><span class="stat-label">Inbound</span><span class="stat-value">2.4 GB/s</span></div>
+            <div class="stat-item"><span class="stat-label">Outbound</span><span class="stat-value">1.8 GB/s</span></div>
+            <div class="stat-item"><span class="stat-label">Blocked</span><span class="stat-value">347 MB/s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal-card">
+        <div class="terminal-header">
+          <div class="terminal-controls">
+            <span class="control-dot red"></span>
+            <span class="control-dot yellow"></span>
+            <span class="control-dot green"></span>
+          </div>
+          <div class="terminal-title">cybershield_soc_v2.0.0 -- angular_host -- (80x24)</div>
+        </div>
+        <div class="terminal-body" #systemTerminal>
+          @for (log of logs(); track log.timestamp) {
+            <div class="log-line">
+              <span class="log-timestamp">[{{log.timestamp}}]</span>
+              <span class="log-tag" [class]="log.level">{{log.level.toUpperCase()}}</span>
+              <span class="log-message">{{log.msg}}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Threats View -->
+  @if (currentView() === 'threats') {
+    <section class="view active">
+      <div class="view-header"><h2>Threat Intelligence Center</h2></div>
+      <div class="threats-table-container">
+        <table class="threats-table">
+          <thead>
+            <tr>
+              <th>Threat ID</th>
+              <th>Type</th>
+              <th>Severity</th>
+              <th>Source IP</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (threat of threats(); track threat.id) {
+              <tr>
+                <td style="color: var(--color-primary)">{{threat.id}}</td>
+                <td>{{threat.type}}</td>
+                <td><span class="severity-badge" [class]="threat.severity">{{threat.severity}}</span></td>
+                <td>{{threat.source}}</td>
+                <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{threat.status}}</span></td>
+                <td><button class="table-action-btn">Action</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <!-- Incidents View -->
+  @if (currentView() === 'incidents') {
+    <section class="view active">
+      <div class="view-header"><h2>Incident Response (Kanban)</h2></div>
+      <div class="incidents-kanban">
+        @for (status of ['detected', 'investigating', 'containing', 'resolved']; track status) {
+          <div class="kanban-column">
+            <div class="column-header" [class]="status">
+              <h4 style="text-transform: capitalize;">{{status}}</h4>
+              <span class="count">{{getIncidentsByStatus(status).length}}</span>
+            </div>
+            <div class="column-body">
+              @for (inc of getIncidentsByStatus(status); track inc.id) {
+                <div class="kanban-card" (click)="openIncident(inc)">
+                  <div class="kanban-card-header">
+                    <span class="kanban-card-id">{{inc.id}}</span>
+                    <span class="severity-badge" [class]="inc.severity">{{inc.severity}}</span>
+                  </div>
+                  <div class="kanban-card-title">{{inc.type}}</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Vulnerabilities View -->
+  @if (currentView() === 'vulnerabilities') {
+    <section class="view active">
+      <div class="view-header"><h2>Vulnerability Assessment</h2></div>
+      <div class="vulnerabilities-list">
+        @for (vuln of vulnerabilities(); track vuln.id) {
+          <div class="vuln-item" [class]="vuln.severity">
+            <div class="vuln-item-header">
+              <h3 class="vuln-title">{{vuln.title}}</h3>
+              <span class="vuln-cve">{{vuln.id}}</span>
+            </div>
+            <p class="vuln-description">{{vuln.description}}</p>
+            <div class="vuln-footer">
+              <span>CVSS: <strong style="color: var(--color-danger)">{{vuln.score}</strong></span>
+              <span>Systems: {{vuln.systems}}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+  <!-- Compliance View -->
+  @if (currentView() === 'compliance') {
+    <section class="view active">
+      <div class="view-header">
+        <h2>Compliance & Reporting</h2>
+        <button class="action-btn primary">Generate Report</button>
+      </div>
+
+      <div class="compliance-frameworks">
+        @for (framework of complianceFrameworks(); track framework.name) {
+          <div class="framework-card">
+            <div class="framework-header">
+              <h3>{{framework.name}}</h3>
+              <span class="compliance-score">{{framework.score}}%</span>
+            </div>
+            <div class="compliance-bar">
+              <div class="compliance-fill" [style.width.%]="framework.score"></div>
+            </div>
+            <p class="framework-status">{{framework.status}}</p>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+</main>
+
+<!-- Incident Modal -->
+@if (isModalOpen()) {
+  <div class="modal active">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{selectedIncident()?.type}} - {{selectedIncident()?.id}}</h3>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Status:</strong> <span class="status-badge investigating">{{selectedIncident()?.status}}</span></p>
+        <p style="margin: 1rem 0;">{{selectedIncident()?.description}}</p>
+        <div style="display: flex; gap: 1rem;">
+          <button class="action-btn primary">Isolate System</button>
+          <button class="action-btn">Escalate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Notification Panel -->
+<div class="notification-panel" [class.active]="isAlertPanelOpen()">
+  <div class="panel-header"><h3>Security Alerts</h3></div>
+  <div class="notifications-list">
+    <div class="notification-item">
+      <div class="notification-header">
+        <span class="notification-icon">🔴</span>
+        <span class="notification-title">Critical Threat Detected</span>
+      </div>
+      <div class="notification-body">Zero-day exploit attempt on HR Database.</div>
+    </div>
+  </div>
+</div>
