@@ -1,6 +1,6 @@
 # CyberShield Modern - Security Operations Center (SOC) Platform
 
-![CyberShield SOC](https://raw.githubusercontent.com/Raphasha27/cybershield-modern/main/screenshot.png)
+🛡️ **State-of-the-Art Cybersecurity Dashboard**
 
 ## 🛡️ Overview
 **CyberShield Modern** is a state-of-the-art, high-performance Security Operations Center (SOC) dashboard built with **Angular**. It provides security analysts with a real-time, unified view of their organization's security posture, combining dynamic visualizations, live log streaming, and incident management in a premium, responsive interface.
