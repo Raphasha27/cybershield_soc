@@ -13,6 +13,7 @@ declare var Chart: any;
 })
 export class App implements AfterViewInit {
   @ViewChild('systemTerminal') terminalElement!: ElementRef;
+  @ViewChild('aiChatBody') aiChatBody!: ElementRef;
 
   private securityService = inject(SecurityService);
 
@@ -27,8 +28,27 @@ export class App implements AfterViewInit {
   // Local UI State
   currentView = signal('dashboard');
   isAlertPanelOpen = signal(false);
+  isAIPanelOpen = signal(false);
   isModalOpen = signal(false);
   selectedIncident = signal<Incident | null>(null);
+  
+  isProfileModalOpen = signal(false);
+  adminProfile = signal({
+    name: 'Admin',
+    role: 'Security Analyst',
+    department: 'Cyber Operations'
+  });
+
+  notifications = signal([
+    { id: 1, title: 'Critical Threat Detected', message: 'Zero-day exploit attempt on HR Database.', type: 'critical' },
+    { id: 2, title: 'Unusual Traffic Pattern', message: 'Spike in outbound traffic from workstation-7.', type: 'warning' },
+    { id: 3, title: 'Compliance Alert', message: 'NIST framework audit nearing deadline.', type: 'info' }
+  ]);
+
+  toasts = signal<any[]>([]);
+  aiMessages = signal<{ role: 'user' | 'bot', text: string }[]>([
+    { role: 'bot', text: 'Hello Analyst. I am CyberSentinel AI. How can I help you secure the perimeter today?' }
+  ]);
 
   constructor() {
     effect(() => {
@@ -52,10 +72,18 @@ export class App implements AfterViewInit {
   setView(view: string) {
     this.currentView.set(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.showToast('Switching to ' + view, 'info', '📁');
   }
 
   toggleAlertPanel() {
     this.isAlertPanelOpen.update((v: boolean) => !v);
+    if (this.isAIPanelOpen()) this.isAIPanelOpen.set(false);
+  }
+
+  toggleAI() {
+    this.isAIPanelOpen.update((v: boolean) => !v);
+    if (this.isAlertPanelOpen()) this.isAlertPanelOpen.set(false);
+    setTimeout(() => this.scrollAIChat(), 100);
   }
 
   openIncident(incident: Incident) {
@@ -67,10 +95,102 @@ export class App implements AfterViewInit {
     this.isModalOpen.set(false);
   }
 
+  updateIncidentStatus(id: string, status: any) {
+    this.securityService.updateIncidentStatus(id, status);
+    this.showToast(`Incident ${id} moved to ${status}`, 'info', '📋');
+  }
+
+  toggleProfileModal() {
+    this.isProfileModalOpen.update(v => !v);
+  }
+
+  saveProfile(name: string, role: string, dept: string) {
+    this.adminProfile.set({ name, role, department: dept });
+    this.showToast('Profile updated successfully', 'success', '👤');
+    this.isProfileModalOpen.set(false);
+  }
+
+  clearNotifications() {
+    this.notifications.set([]);
+    this.showToast('All notifications cleared', 'success', '🧹');
+  }
+
+  search(event: any) {
+    const query = (event.target as HTMLInputElement).value;
+    if (query) {
+      this.showToast(`Searching for "${query}"...`, 'info', '🔎');
+    }
+  }
+
+  performThreatAction(threat: any) {
+    this.showToast(`Analyzing threat ${threat.id}...`, 'warning', '🧪');
+    setTimeout(() => {
+      this.showToast(`Threat ${threat.id} has been isolated`, 'success', '🛡️');
+    }, 2000);
+  }
+
+  generateReport() {
+    this.showToast('Compiling security metrics...', 'info', '📊');
+    setTimeout(() => {
+      this.showToast('Report generated successfully', 'success', '✅');
+    }, 3000);
+  }
+
+  isolateSystem() {
+    const id = this.selectedIncident()?.id;
+    this.showToast(`Initiating isolation for ${id}...`, 'critical', '🔒');
+    setTimeout(() => {
+      this.showToast(`System ${id} successfully isolated from network`, 'success', '🛡️');
+      this.closeModal();
+    }, 2500);
+  }
+
+  escalateIncident() {
+    this.showToast('Escalating to Level 2 security response team...', 'warning', '📢');
+    setTimeout(() => {
+      this.showToast('Escalation confirmed', 'info', '📤');
+      this.closeModal();
+    }, 1500);
+  }
+
+  sendAIMessage(text: string) {
+    if (!text.trim()) return;
+    
+    this.aiMessages.update(msgs => [...msgs, { role: 'user', text }]);
+    setTimeout(() => this.scrollAIChat(), 0);
+
+    // Simple bot logic
+    setTimeout(() => {
+      let response = "I'm analyzing the data patterns for you.";
+      if (text.toLowerCase().includes('threat')) {
+        response = `Current threat level is ${this.threatLevel().toFixed(1)}%. I recommend reviewing the latest DDoS attempts from ${this.threats()[0].source}.`;
+      } else if (text.toLowerCase().includes('incident')) {
+        response = `There are ${this.incidents().length} active incidents. The most critical is ${this.incidents()[1].type}.`;
+      }
+      
+      this.aiMessages.update(msgs => [...msgs, { role: 'bot', text: response }]);
+      setTimeout(() => this.scrollAIChat(), 0);
+    }, 1000);
+  }
+
   private scrollTerminal() {
     if (this.terminalElement) {
       this.terminalElement.nativeElement.scrollTop = this.terminalElement.nativeElement.scrollHeight;
     }
+  }
+
+  private scrollAIChat() {
+    if (this.aiChatBody) {
+      this.aiChatBody.nativeElement.scrollTop = this.aiChatBody.nativeElement.scrollHeight;
+    }
+  }
+
+  private showToast(message: string, type: string = 'info', icon: string = 'ℹ️') {
+    const id = Date.now();
+    this.toasts.update(t => [...t, { id, message, type, icon }]);
+    setTimeout(() => {
+      this.toasts.update(t => t.filter(toast => toast.id !== id));
+    }, 4000);
   }
 
   private initCharts() {

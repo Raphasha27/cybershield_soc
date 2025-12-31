@@ -34,17 +34,22 @@
     
     <div class="header-actions">
       <div class="search-bar">
-        <input type="text" placeholder="Search security events...">
+        <input type="text" placeholder="Search security events..." (keyup.enter)="search($event)">
         <span class="search-icon">🔎</span>
       </div>
       <button class="alert-btn" (click)="toggleAlertPanel()">
         <span class="alert-icon">🔔</span>
-        <span class="alert-badge">12</span>
+        <span class="alert-badge">{{notifications().length}}</span>
       </button>
-      <div class="user-profile">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="Admin">
-        <span class="user-name">Admin</span>
-      </div>
+      <button class="ai-toggle-btn" (click)="toggleAI()">
+        <span class="ai-icon">🤖</span>
+      </button>
+      <button class="user-profile-btn" (click)="toggleProfileModal()">
+        <div class="user-profile">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="Admin">
+          <span class="user-name">{{adminProfile().name}}</span>
+        </div>
+      </button>
     </div>
   </div>
 </header>
@@ -60,36 +65,38 @@
           <div class="threat-level">
             <span class="threat-icon">⚡</span>
             <div class="threat-info">
-              <h3>Current Threat Level: <span class="threat-status" [style.color]="threatLevel() > 70 ? 'var(--color-critical)' : 'var(--color-warning)'">
-                {{ threatLevel() > 80 ? 'CRITICAL' : (threatLevel() > 60 ? 'ELEVATED' : 'MODERATE') }} ({{ threatLevel().toFixed(1) }}%)
-              </span></h3>
+              <div class="threat-title-row">
+                <h3>Current Threat Level: <span class="threat-status" [style.color]="threatLevel() > 70 ? 'var(--color-critical)' : 'var(--color-warning)'">
+                  {{ threatLevel() > 80 ? 'CRITICAL' : (threatLevel() > 60 ? 'ELEVATED' : 'MODERATE') }} ({{ threatLevel().toFixed(1) }}%)
+                </span></h3>
+                <button class="action-btn primary small" (click)="setView('threats')">View Details</button>
+              </div>
               <p>Real-time heuristic analysis active</p>
             </div>
           </div>
           <div class="threat-gauge">
             <div class="gauge-fill" [style.width.%]="threatLevel()" [class.high]="threatLevel() > 70"></div>
           </div>
-          <button class="action-btn primary">View Details</button>
         </div>
       </div>
 
       <div class="metrics-grid">
-        <div class="metric-card critical">
+        <div class="metric-card critical" (click)="setView('threats')">
           <div class="metric-header"><span class="metric-icon">🔴</span><h4>Critical Alerts</h4></div>
           <div class="metric-value"><span class="value">23</span><span class="trend up">+12%</span></div>
           <div class="metric-footer"><span class="metric-label">Last 24 hours</span></div>
         </div>
-        <div class="metric-card warning">
+        <div class="metric-card warning" (click)="setView('incidents')">
           <div class="metric-header"><span class="metric-icon">🟡</span><h4>Active Incidents</h4></div>
           <div class="metric-value"><span class="value">47</span><span class="trend down">-8%</span></div>
           <div class="metric-footer"><span class="metric-label">Requiring attention</span></div>
         </div>
-        <div class="metric-card info">
+        <div class="metric-card info" (click)="setView('vulnerabilities')">
           <div class="metric-header"><span class="metric-icon">🔵</span><h4>Vulnerabilities</h4></div>
           <div class="metric-value"><span class="value">156</span><span class="trend up">+5%</span></div>
           <div class="metric-footer"><span class="metric-label">Unpatched systems</span></div>
         </div>
-        <div class="metric-card success">
+        <div class="metric-card success" (click)="setView('compliance')">
           <div class="metric-header"><span class="metric-icon">🟢</span><h4>Systems Protected</h4></div>
           <div class="metric-value"><span class="value">1,247</span><span class="trend neutral">0%</span></div>
           <div class="metric-footer"><span class="metric-label">Network devices</span></div>
@@ -134,7 +141,7 @@
         <div class="section-card">
           <div class="card-header">
             <h3>Recent Security Incidents</h3>
-            <button class="view-all-btn">View All →</button>
+            <button class="view-all-btn" (click)="setView('incidents')">View All →</button>
           </div>
           <div class="incidents-list">
             @for (inc of incidents().slice(0, 5); track inc.id) {
@@ -211,7 +218,7 @@
                 <td><span class="severity-badge" [class]="threat.severity">{{threat.severity}}</span></td>
                 <td>{{threat.source}}</td>
                 <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{threat.status}}</span></td>
-                <td><button class="table-action-btn">Action</button></td>
+                <td><button class="table-action-btn" (click)="performThreatAction(threat)">Action</button></td>
               </tr>
             }
           </tbody>
@@ -233,12 +240,31 @@
             </div>
             <div class="column-body">
               @for (inc of getIncidentsByStatus(status); track inc.id) {
-                <div class="kanban-card" (click)="openIncident(inc)">
-                  <div class="kanban-card-header">
-                    <span class="kanban-card-id">{{inc.id}}</span>
-                    <span class="severity-badge" [class]="inc.severity">{{inc.severity}}</span>
+                <div class="kanban-card">
+                  <div (click)="openIncident(inc)">
+                    <div class="kanban-card-header">
+                      <span class="kanban-card-id">{{inc.id}}</span>
+                      <span class="severity-badge" [class]="inc.severity">{{inc.severity}}</span>
+                    </div>
+                    <div class="kanban-card-title">{{inc.type}}</div>
                   </div>
-                  <div class="kanban-card-title">{{inc.type}}</div>
+                  
+                  <div class="kanban-card-actions">
+                    @if (status === 'detected') {
+                      <button (click)="updateIncidentStatus(inc.id, 'investigating')">Investigate →</button>
+                    }
+                    @if (status === 'investigating') {
+                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'detected')">← Reset</button>
+                      <button (click)="updateIncidentStatus(inc.id, 'containing')">Contain →</button>
+                    }
+                    @if (status === 'containing') {
+                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'investigating')">← Back</button>
+                      <button (click)="updateIncidentStatus(inc.id, 'resolved')">Resolve 🗸</button>
+                    }
+                    @if (status === 'resolved') {
+                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'containing')">← Reopen</button>
+                    }
+                  </div>
                 </div>
               }
             </div>
@@ -274,7 +300,7 @@
     <section class="view active">
       <div class="view-header">
         <h2>Compliance & Reporting</h2>
-        <button class="action-btn primary">Generate Report</button>
+        <button class="action-btn primary" (click)="generateReport()">Generate Report</button>
       </div>
 
       <div class="compliance-frameworks">
@@ -308,8 +334,8 @@
         <p><strong>Status:</strong> <span class="status-badge investigating">{{selectedIncident()?.status}}</span></p>
         <p style="margin: 1rem 0;">{{selectedIncident()?.description}}</p>
         <div style="display: flex; gap: 1rem;">
-          <button class="action-btn primary">Isolate System</button>
-          <button class="action-btn">Escalate</button>
+          <button class="action-btn primary" (click)="isolateSystem()">Isolate System</button>
+          <button class="action-btn" (click)="escalateIncident()">Escalate</button>
         </div>
       </div>
     </div>
@@ -318,14 +344,100 @@
 
 <!-- Notification Panel -->
 <div class="notification-panel" [class.active]="isAlertPanelOpen()">
-  <div class="panel-header"><h3>Security Alerts</h3></div>
+  <div class="panel-header">
+    <h3>Security Alerts</h3>
+    <button class="clear-btn" (click)="clearNotifications()">Clear All</button>
+  </div>
   <div class="notifications-list">
-    <div class="notification-item">
-      <div class="notification-header">
-        <span class="notification-icon">🔴</span>
-        <span class="notification-title">Critical Threat Detected</span>
+    @for (note of notifications(); track note.id) {
+      <div class="notification-item" [class]="note.type">
+        <div class="notification-header">
+          <span class="notification-icon">{{note.type === 'critical' ? '🔴' : '🟡'}}</span>
+          <span class="notification-title">{{note.title}}</span>
+        </div>
+        <div class="notification-body">{{note.message}}</div>
       </div>
-      <div class="notification-body">Zero-day exploit attempt on HR Database.</div>
-    </div>
+    }
+    @if (notifications().length === 0) {
+      <div class="empty-notifications">No new alerts</div>
+    }
   </div>
 </div>
+
+<!-- AI Assistant Sidebar -->
+<div class="ai-sidebar" [class.active]="isAIPanelOpen()">
+  <div class="ai-header">
+    <div class="ai-title">
+      <span class="ai-bot-icon">🤖</span>
+      <div>
+        <h3>CyberSentinel AI</h3>
+        <span class="ai-status">Ready to assist</span>
+      </div>
+    </div>
+    <button class="close-btn" (click)="toggleAI()">✕</button>
+  </div>
+  
+  <div class="ai-chat-body" #aiChatBody>
+    @for (msg of aiMessages(); track $index) {
+      <div class="chat-message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
+        <div class="message-bubble">{{msg.text}}</div>
+      </div>
+    }
+  </div>
+
+  <div class="ai-input-area">
+    <input type="text" #aiInput placeholder="Ask CyberSentinel about threats..." (keyup.enter)="sendAIMessage(aiInput.value); aiInput.value = ''">
+    <button class="send-btn" (click)="sendAIMessage(aiInput.value); aiInput.value = ''">⬆️</button>
+  </div>
+  
+  <div class="ai-suggestions">
+    <button (click)="aiInput.value = 'Analyze current threat level'">Analyze Threats</button>
+    <button (click)="aiInput.value = 'Summarize latest incidents'">Recent Incidents</button>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container">
+  @for (toast of toasts(); track toast.id) {
+    <div class="toast" [class]="toast.type">
+      <span class="toast-icon">{{toast.icon}}</span>
+      <span class="toast-message">{{toast.message}}</span>
+    </div>
+  }
+</div>
+
+<!-- Profile Edit Modal -->
+@if (isProfileModalOpen()) {
+  <div class="modal active profile">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Administrator Profile</h3>
+        <button class="close-btn" (click)="toggleProfileModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Full Name</label>
+          <input type="text" #nameInput [value]="adminProfile().name" 
+            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
+            placeholder="Enter name...">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Professional Role</label>
+          <input type="text" #roleInput [value]="adminProfile().role" 
+            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
+            placeholder="e.g. Senior Security Analyst">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Department</label>
+          <input type="text" #deptInput [value]="adminProfile().department" 
+            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
+            placeholder="e.g. SOC Team Alpha">
+        </div>
+        <div class="modal-bottom-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
+          <button class="action-btn primary" style="flex: 1;" (click)="saveProfile(nameInput.value, roleInput.value, deptInput.value)">Save Changes</button>
+          <button class="action-btn" style="flex: 1;" (click)="toggleProfileModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
