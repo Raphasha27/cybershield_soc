@@ -33,6 +33,9 @@ View the live dashboard: [CyberShield SOC - Live](https://raphasha27.github.io/c
 ### 🚨 Incident Response (Kanban Board)
 ![Incidents](screenshots/github_incidents.png)
 
+### 🛡️ Threat Intelligence Center
+![Threat Intelligence](screenshots/threats.png)
+
 ## 🚀 Technology Stack
 -   **Framework**: [Angular](https://angular.io/) (Latest Version)
 -   **State Management**: [Angular Signals](https://angular.io/guide/signals)
