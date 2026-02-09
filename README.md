@@ -12,7 +12,7 @@
 ### 🖥️ Unified SOC Dashboard
 View the live dashboard: [CyberShield SOC - Live](https://raphasha27.github.io/cybershield-modern/)
 
-![Main Dashboard](screenshots/github_dashboard.png)
+
 
 ---
 
