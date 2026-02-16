@@ -1,352 +1,347 @@
-import { Component, signal, computed, effect, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CafeService, Session, Station } from './cafe.service';
+import { FormsModule } from '@angular/forms';
 
-declare var Chart: any;
+interface User {
+  email: string;
+  password?: string;
+  name: string;
+  phone: string;
+}
+
+interface Booking {
+  id: number;
+  date: string;
+  time: string;
+  duration: string;
+  station: number;
+  purpose: string;
+  notes: string;
+  cost: number;
+  status: string;
+  user: string;
+}
+
+interface Station {
+  id: number;
+  occupied: boolean;
+  selected: boolean;
+}
+
+interface CartItem {
+  name: string;
+  price: number;
+}
+
+interface ChatMessage {
+  role: 'user' | 'staff';
+  text: string;
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: '../styles.css'
 })
-export class App implements AfterViewInit {
-  @ViewChild('systemTerminal') terminalElement!: ElementRef;
-  @ViewChild('aiChatBody') aiChatBody!: ElementRef;
+export class App implements OnInit {
+  // Navigation State
+  activePage: string = 'loginPage';
+  activeTab: string = 'home';
+  activeCategory: string = 'all';
 
-  private cafeService = inject(CafeService);
+  // User State
+  currentUser: User | null = null;
+  mockUsers: User[] = [
+    { email: 'demo@kdtcafe.co.za', password: 'demo123', name: 'Demo User', phone: '0821234567' }
+  ];
 
-  // Expose service signals to template
-  sessions = this.cafeService.sessions;
-  stations = this.cafeService.stations;
-  bookings = this.cafeService.bookings;
-  logs = this.cafeService.logs;
-  loadLevel = this.cafeService.loadLevel;
-  performanceMetrics = this.cafeService.performanceMetrics;
-  digitalServices = this.cafeService.digitalServices;
-  trainingCourses = this.cafeService.trainingCourses;
-  clientProjects = this.cafeService.clientProjects;
-  loyaltyMembers = this.cafeService.loyaltyMembers;
-  wallet = this.cafeService.wallet;
-  membershipPlans = this.cafeService.membershipPlans;
-  supportTickets = this.cafeService.supportTickets;
-  tournaments = this.cafeService.tournaments;
-  businessPlan = (this.cafeService as any)._businessPlanDetails;
+  // Data State
+  stations: Station[] = [];
+  bookings: Booking[] = [];
+  walletBalance: number = 250;
+  rewardPoints: number = 450;
+  cartItems: CartItem[] = [];
 
-  // Computed occupancy
-  freeGamingPCs = computed(() => this.stations().filter((s: Station) => s.type.includes('Gaming') && s.status === 'Available').length);
-  freeStandardPCs = computed(() => this.stations().filter((s: Station) => s.type.includes('Standard') && s.status === 'Available').length);
+  // Form Models
+  loginData = { email: '', password: '' };
+  registerData = { name: '', email: '', phone: '', password: '' };
+  bookingData = {
+    date: new Date().toISOString().split('T')[0],
+    time: '',
+    duration: '',
+    purpose: '',
+    notes: ''
+  };
+  topUpAmount: number | null = null;
+  paymentMethod: string = '';
+  chatInput: string = '';
 
+  // UI State
+  selectedStation: number | null = null;
+  bookingAlert: { message: string, type: 'success' | 'info' | 'warning' } | null = null;
+  isChatActive: boolean = false;
+  isTopUpModalActive: boolean = false;
+  chatMessages: ChatMessage[] = [
+    { role: 'staff', text: 'Hi! How can we help you today?' }
+  ];
 
+  // Constants
+  today = new Date().toISOString().split('T')[0];
 
-
-
-  // Local UI State
-  isLoggedIn = signal(false);
-  isLandingPage = signal(true);
-  currentUser = signal({
-    name: 'Sarah Connor',
-    email: 'sarah@kdtcafe.co.za',
-    points: 890,
-    tier: 'Elite Hub Member',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah'
-  });
-
-
-  currentView = signal('dashboard');
-  isAlertPanelOpen = signal(false);
-  isAIPanelOpen = signal(false);
-  isModalOpen = signal(false);
-  selectedSession = signal<Session | null>(null);
-
-  isProfileModalOpen = signal(false);
-  adminProfile = signal({
-    name: 'Sarah Connor',
-    role: 'Loyalty Member',
-    department: 'Software Engineering Student'
-  });
-
-  notifications = signal([
-    { id: 1, title: 'Booking Confirmed', message: 'Your gaming slot for 14:00 is ready!', type: 'success' },
-    { id: 2, title: 'Low Points Alert', message: 'Earn 110 more points for a free hour.', type: 'info' }
-  ]);
-
-  toasts = signal<any[]>([]);
-  aiMessages = signal<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: 'Welcome back Sarah! How can I help you with your Hub experience today?' }
-  ]);
-
-
-  constructor() {
-    effect(() => {
-      if (this.currentView() === 'dashboard') {
-        this.initCharts();
-      }
-    });
-
-    effect(() => {
-      this.logs();
-      setTimeout(() => this.scrollTerminal(), 0);
-    });
+  ngOnInit() {
+    this.initializeStations();
   }
 
-  ngAfterViewInit() {
-    this.initCharts();
+  // Navigation
+  showPage(pageId: string) {
+    this.activePage = pageId;
   }
 
-  setView(view: string) {
-    this.currentView.set(view);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    this.showToast('Switching to ' + view, 'info', '📁');
+  switchTab(tabName: string) {
+    this.activeTab = tabName;
   }
 
-  toggleAlertPanel() {
-    this.isAlertPanelOpen.update((v: boolean) => !v);
-    if (this.isAIPanelOpen()) this.isAIPanelOpen.set(false);
+  // Auth
+  onLogin() {
+    const user = this.mockUsers.find(u => u.email === this.loginData.email && u.password === this.loginData.password);
+
+    if (user) {
+      this.currentUser = user;
+      this.showPage('dashboardPage');
+      this.initializeStations();
+      this.updateDashboard();
+    } else {
+      alert('Invalid credentials! Use demo@kdtcafe.co.za / demo123');
+    }
   }
 
-  toggleAI() {
-    this.isAIPanelOpen.update((v: boolean) => !v);
-    if (this.isAlertPanelOpen()) this.isAlertPanelOpen.set(false);
-    setTimeout(() => this.scrollAIChat(), 100);
-  }
-
-  openSession(session: Session) {
-    this.selectedSession.set(session);
-    this.isModalOpen.set(true);
-  }
-
-  closeModal() {
-    this.isModalOpen.set(false);
-  }
-
-  updateSessionStatus(id: string, status: any) {
-    this.cafeService.updateSessionStatus(id, status);
-    this.showToast(`Session ${id} marked as ${status}`, 'info', '📋');
-  }
-
-  // Auth Actions
-  getStarted() {
-    this.isLandingPage.set(false);
-    this.showToast('Welcome to the Gateway', 'info', '🔓');
-  }
-
-  login() {
-    this.isLoggedIn.set(true);
-    this.showToast('Access Granted. Welcome back!', 'success', '🚀');
-    this.setView('dashboard');
+  onRegister() {
+    this.mockUsers.push({ ...this.registerData });
+    alert('Registration successful! Please login with your credentials.');
+    this.showPage('loginPage');
+    this.registerData = { name: '', email: '', phone: '', password: '' };
   }
 
   logout() {
-    this.isLoggedIn.set(false);
-    this.isLandingPage.set(true);
-    this.showToast('Logged out safely', 'info', '🔒');
-  }
-
-  toggleProfileModal() {
-    this.isProfileModalOpen.update((v: boolean) => !v);
-  }
-
-  addFunds(amount: number) {
-    this.showToast(`Adding R${amount} to your wallet...`, 'success', '💳');
-    // In a real app, this would call the service to update the signal
-    this.showToast('Wallet balance updated', 'info', '✅');
-  }
-
-  subscribeMembership(tier: string) {
-    this.showToast(`Activating ${tier} membership...`, 'success', '🎖️');
-    this.showToast('Membership active! Enjoy your perks.', 'info', '✨');
-  }
-
-  submitSupportTicket(subject: string) {
-    if (!subject) return;
-    this.showToast('Submitting support ticket...', 'info', '💬');
-    setTimeout(() => {
-      this.showToast('Ticket #TIC-' + Math.floor(Math.random() * 1000) + ' created', 'success', '✅');
-    }, 1500);
-  }
-
-
-
-  saveProfile(name: string, role: string, dept: string) {
-    this.adminProfile.set({ name, role, department: dept });
-    this.showToast('Profile updated successfully', 'success', '👤');
-    this.isProfileModalOpen.set(false);
-  }
-
-  clearNotifications() {
-    this.notifications.set([]);
-    this.showToast('All notifications cleared', 'success', '🧹');
-  }
-
-  search(event: Event) {
-    const query = (event.target as HTMLInputElement).value;
-    if (query) {
-      this.showToast(`Searching for "${query}"...`, 'info', '🔎');
+    if (confirm('Are you sure you want to logout?')) {
+      this.currentUser = null;
+      this.bookings = [];
+      this.cartItems = [];
+      this.showPage('loginPage');
+      this.loginData = { email: '', password: '' };
     }
   }
 
-  performStationAction(station: any) {
-    this.showToast(`Running diagnostics on ${station.id}...`, 'warning', '🔧');
-    setTimeout(() => {
-      this.showToast(`Diagnostics for ${station.id} completed. System healthy.`, 'success', '✅');
-    }, 2000);
+  // Stations & Booking
+  initializeStations() {
+    this.stations = [];
+    for (let i = 1; i <= 20; i++) {
+      const isOccupied = Math.random() > 0.7;
+      this.stations.push({
+        id: i,
+        occupied: isOccupied,
+        selected: false
+      });
+    }
   }
 
-  generateReport() {
-    this.showToast('Compiling daily revenue and occupancy report...', 'info', '📊');
-    setTimeout(() => {
-      this.showToast('Report generated successfully', 'success', '✅');
-    }, 3000);
+  selectStation(stationId: number) {
+    const station = this.stations.find(s => s.id === stationId);
+    if (!station || station.occupied) return;
+
+    this.stations.forEach(s => s.selected = false);
+    station.selected = true;
+    this.selectedStation = stationId;
   }
 
-  lockStation() {
-    const id = this.selectedSession()?.stationId;
-    this.showToast(`Locking station ${id}...`, 'critical', '🔒');
-    setTimeout(() => {
-      this.showToast(`Station ${id} locked. Session suspended.`, 'success', '🛡️');
-      this.closeModal();
-    }, 1500);
+  confirmBooking() {
+    if (!this.selectedStation) {
+      this.showAlert('Please select a station', 'info');
+      return;
+    }
+
+    if (!this.bookingData.duration) {
+      this.showAlert('Please select a duration', 'info');
+      return;
+    }
+
+    const duration = parseInt(this.bookingData.duration);
+    const prices: any = { '1': 30, '2': 55, '3': 80, '4': 100, '8': 180 };
+    const cost = prices[duration.toString()];
+
+    if (this.walletBalance < cost) {
+      this.showAlert('Insufficient wallet balance. Please top up your wallet first.', 'warning');
+      return;
+    }
+
+    const booking: Booking = {
+      id: Date.now(),
+      date: this.bookingData.date,
+      time: this.bookingData.time,
+      duration: duration.toString(),
+      station: this.selectedStation,
+      purpose: this.bookingData.purpose,
+      notes: this.bookingData.notes,
+      cost: cost,
+      status: 'upcoming',
+      user: this.currentUser!.name
+    };
+
+    this.bookings.push(booking);
+    this.walletBalance -= cost;
+    this.rewardPoints += Math.floor(cost / 10) * 10;
+
+    this.showAlert(`Booking confirmed! R${cost} deducted from your wallet. You earned ${Math.floor(cost / 10) * 10} reward points!`, 'success');
+
+    // Reset form
+    this.bookingData = {
+      date: this.today,
+      time: '',
+      duration: '',
+      purpose: '',
+      notes: ''
+    };
+    this.selectedStation = null;
+    this.initializeStations();
+    this.updateDashboard();
   }
 
-  extendSession() {
-    this.showToast('Adding 30 minutes to session...', 'warning', '⏳');
+  cancelBooking(bookingId: number) {
+    if (confirm('Are you sure you want to cancel this booking? You will receive a full refund.')) {
+      const booking = this.bookings.find(b => b.id === bookingId);
+      if (booking) {
+        this.walletBalance += booking.cost;
+        this.bookings = this.bookings.filter(b => b.id !== bookingId);
+        this.updateDashboard();
+        alert('Booking cancelled successfully! Refund added to your wallet.');
+      }
+    }
+  }
+
+  showAlert(message: string, type: 'success' | 'info' | 'warning') {
+    this.bookingAlert = { message, type };
+    setTimeout(() => this.bookingAlert = null, 5000);
+  }
+
+  updateDashboard() {
+    // Logic to update stats if stored separately, currently binding directly to variables
+  }
+
+  // Wallet
+  showTopUpModal() {
+    this.isTopUpModalActive = true;
+  }
+
+  closeModal(modalId: string) {
+    if (modalId === 'topUpModal') this.isTopUpModalActive = false;
+  }
+
+  setTopUpAmount(amount: number) {
+    this.topUpAmount = amount;
+  }
+
+  completeTopUp() {
+    const amount = this.topUpAmount;
+    if (!amount || amount < 10) {
+      alert('Please enter an amount of at least R10');
+      return;
+    }
+
+    if (!this.paymentMethod) {
+      alert('Please select a payment method');
+      return;
+    }
+
+    this.walletBalance += amount;
+    this.isTopUpModalActive = false;
+    this.topUpAmount = null;
+    this.paymentMethod = '';
+    alert(`Successfully added R${amount.toFixed(2)} to your wallet!`);
+  }
+
+  showTransactionHistory() {
+    // Logic for switching to transaction history via a modal or existing tab
+    // For now, assuming it switches to Wallet tab or shows an alert as per user code possibility
+    // User code: just button, let's switch to Wallet tab just in case
+    this.switchTab('wallet');
+  }
+
+  // Food & Cart
+  addToCart(itemName: string, price: number) {
+    if (this.walletBalance < price) {
+      alert('Insufficient wallet balance!');
+      return;
+    }
+    this.cartItems.push({ name: itemName, price });
+    alert(`${itemName} added to cart! Click the cart icon to checkout.`);
+  }
+
+  checkout() {
+    if (this.cartItems.length === 0) {
+      alert('Your cart is empty!');
+      return;
+    }
+
+    const total = this.cartItems.reduce((sum, item) => sum + item.price, 0);
+    const itemsList = this.cartItems.map(item => `${item.name} - R${item.price}`).join('\n');
+
+    if (confirm(`Your Order:\n${itemsList}\n\nTotal: R${total}\n\nConfirm order?`)) {
+      this.walletBalance -= total;
+      this.rewardPoints += total;
+      this.cartItems = [];
+      alert(`Order confirmed! R${total} deducted. You earned ${total} reward points! Food will be delivered to your station.`);
+    }
+  }
+
+  filterMenu(category: string) {
+    this.activeCategory = category;
+  }
+
+  // Rewards & Tournaments
+  registerTournament(tournamentName: string) {
+    const entryFee = 50;
+    if (this.walletBalance < entryFee) {
+      alert('Insufficient wallet balance! Please top up.');
+      return;
+    }
+
+    if (confirm(`Register for ${tournamentName}? Entry fee: R${entryFee}`)) {
+      this.walletBalance -= entryFee;
+      this.rewardPoints += 100;
+      alert(`Successfully registered for ${tournamentName}! Good luck! 🏆`);
+    }
+  }
+
+  redeemReward(rewardName: string, pointsCost: number) {
+    if (this.rewardPoints < pointsCost) {
+      alert('Insufficient reward points!');
+      return;
+    }
+
+    if (confirm(`Redeem ${rewardName} for ${pointsCost} points?`)) {
+      this.rewardPoints -= pointsCost;
+      if (rewardName.includes('Wallet Credit')) {
+        this.walletBalance += 50;
+      }
+      alert(`${rewardName} redeemed successfully! 🎉`);
+    }
+  }
+
+  // Chat
+  toggleChat() {
+    this.isChatActive = !this.isChatActive;
+  }
+
+  sendMessage() {
+    if (!this.chatInput.trim()) return;
+
+    this.chatMessages.push({ role: 'user', text: this.chatInput });
+    this.chatInput = '';
+
     setTimeout(() => {
-      this.showToast('Session extended by 30m', 'info', '⌛');
-      this.closeModal();
+      this.chatMessages.push({ role: 'staff', text: 'Thanks for your message! A staff member will assist you shortly.' });
     }, 1000);
-  }
-
-  sendAIMessage(text: string) {
-    if (!text.trim()) return;
-
-    this.aiMessages.update((msgs: any[]) => [...msgs, { role: 'user', text }]);
-    setTimeout(() => this.scrollAIChat(), 0);
-
-    setTimeout(() => {
-      let response = "I'm checking the current floor status and business metrics for you.";
-      const lowText = text.toLowerCase();
-      const plan = this.businessPlan();
-
-      if (lowText.includes('station') || lowText.includes('free')) {
-        const free = this.stations().filter((s: any) => s.status === 'Available').length;
-        response = `There are currently ${free} stations available. I recommend PC-02 for gaming (R${plan.pricing.gaming_hour}/hr).`;
-      } else if (lowText.includes('price') || lowText.includes('cost') || lowText.includes('rate')) {
-        response = `Our current rates are: Internet R${plan.pricing.internet_hour}/hr, Gaming R${plan.pricing.gaming_hour}/hr, B&W Print R${plan.pricing.print_bw}/pg, CV Typing R${plan.pricing.cv_typing}.`;
-      } else if (lowText.includes('revenue') || lowText.includes('target') || lowText.includes('money')) {
-        response = `We are at 72% of our monthly R50,000 revenue target. We need approximately R14,000 more to hit the goal.`;
-      } else if (lowText.includes('service') || lowText.includes('offer')) {
-        response = "We offer High-Speed Internet, Printing, CV Typing, Online Job Applications, Gaming, and Passport Photos.";
-      } else if (lowText.includes('plan') || lowText.includes('business')) {
-        response = `Our plan focuses on students and job seekers in Atteridgeville. We operate 15 PCs on a 200Mbps fibre line with full power backup.`;
-      } else if (lowText.includes('project') || lowText.includes('client') || lowText.includes('agency')) {
-        const active = this.clientProjects().filter((p: any) => p.status !== 'Launched').length;
-        response = `We have ${active} active agency projects. Our biggest current contract is a Web Design project for R4,500.`;
-      } else if (lowText.includes('loyalty') || lowText.includes('point') || lowText.includes('member')) {
-        const top = this.loyaltyMembers()[2]; // Sarah
-        response = `${top.name} is our top loyalty member with ${top.points} points. Loyalty members get 1 hour free for every 10 hours purchased.`;
-      } else if (lowText.includes('wallet') || lowText.includes('balance') || lowText.includes('money')) {
-        response = `Your current Hub Wallet balance is R${this.wallet().balance}. You can top up at the front desk or via the Wallet tab.`;
-      } else if (lowText.includes('print') || lowText.includes('upload')) {
-        response = `You can upload documents in the Printing tab. We offer A4/A3, B&W (R2/pg) and Color (R10/pg).`;
-      } else if (lowText.includes('gaming') || lowText.includes('game') || lowText.includes('tournament')) {
-        response = `Join our upcoming FIFA 26 tournament on Feb 28! We have RTX 4080 rigs and 240Hz monitors for the best experience.`;
-      }
-
-
-
-      this.aiMessages.update((msgs: any[]) => [...msgs, { role: 'bot', text: response }]);
-      setTimeout(() => this.scrollAIChat(), 0);
-    }, 1000);
-  }
-
-
-  private scrollTerminal() {
-    if (this.terminalElement) {
-      this.terminalElement.nativeElement.scrollTop = this.terminalElement.nativeElement.scrollHeight;
-    }
-  }
-
-  private scrollAIChat() {
-    if (this.aiChatBody) {
-      this.aiChatBody.nativeElement.scrollTop = this.aiChatBody.nativeElement.scrollHeight;
-    }
-  }
-
-  private showToast(message: string, type: string = 'info', icon: string = 'ℹ️') {
-    const id = Date.now();
-    this.toasts.update((t: any[]) => [...t, { id, message, type, icon }]);
-    setTimeout(() => {
-      this.toasts.update((t: any[]) => t.filter((toast: any) => toast.id !== id));
-    }, 4000);
-  }
-
-  private initCharts() {
-    setTimeout(() => {
-      const timelineCtx = document.getElementById('occupancyTimelineChart') as any;
-      if (timelineCtx) {
-        new Chart(timelineCtx, {
-          type: 'line',
-          data: {
-            labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
-            datasets: [
-              {
-                label: 'Occupancy %',
-                data: [15, 45, 75, 90, 80, 100, 95, 50],
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 3,
-                pointRadius: 4,
-                pointBackgroundColor: '#3b82f6'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
-              x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-            }
-          }
-        });
-      }
-
-      const trafficCtx = document.getElementById('revenueChart') as any;
-      if (trafficCtx) {
-        new Chart(trafficCtx, {
-          type: 'bar',
-          data: {
-            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            datasets: [{
-              label: 'Daily Revenue (R)',
-              data: [1200, 1500, 1100, 1800, 2500, 3500, 2800],
-              backgroundColor: '#10b981',
-              borderRadius: 6,
-              hoverBackgroundColor: '#059669'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
-              x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-            }
-          }
-        });
-      }
-    }, 100);
-  }
-
-
-  getSessionsByStatus(status: string) {
-    return this.sessions().filter((i: Session) => i.status === status);
   }
 }
-
