@@ -1,6 +1,6 @@
-import { Component, signal, effect, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
+import { Component, signal, computed, effect, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CafeService, Session } from './security.service'; // Keeping filename for now to avoid breaking imports elsewhere if any
+import { CafeService, Session, Station } from './cafe.service';
 
 declare var Chart: any;
 
@@ -24,8 +24,36 @@ export class App implements AfterViewInit {
   logs = this.cafeService.logs;
   loadLevel = this.cafeService.loadLevel;
   performanceMetrics = this.cafeService.performanceMetrics;
+  digitalServices = this.cafeService.digitalServices;
+  trainingCourses = this.cafeService.trainingCourses;
+  clientProjects = this.cafeService.clientProjects;
+  loyaltyMembers = this.cafeService.loyaltyMembers;
+  wallet = this.cafeService.wallet;
+  membershipPlans = this.cafeService.membershipPlans;
+  supportTickets = this.cafeService.supportTickets;
+  tournaments = this.cafeService.tournaments;
+  businessPlan = (this.cafeService as any)._businessPlanDetails;
+
+  // Computed occupancy
+  freeGamingPCs = computed(() => this.stations().filter((s: Station) => s.type.includes('Gaming') && s.status === 'Available').length);
+  freeStandardPCs = computed(() => this.stations().filter((s: Station) => s.type.includes('Standard') && s.status === 'Available').length);
+
+
+
+
 
   // Local UI State
+  isLoggedIn = signal(false);
+  isLandingPage = signal(true);
+  currentUser = signal({
+    name: 'Sarah Connor',
+    email: 'sarah@kdtcafe.co.za',
+    points: 890,
+    tier: 'Elite Hub Member',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah'
+  });
+
+
   currentView = signal('dashboard');
   isAlertPanelOpen = signal(false);
   isAIPanelOpen = signal(false);
@@ -34,21 +62,21 @@ export class App implements AfterViewInit {
 
   isProfileModalOpen = signal(false);
   adminProfile = signal({
-    name: 'Cafe Admin',
-    role: 'Operations Manager',
-    department: 'Front Desk'
+    name: 'Sarah Connor',
+    role: 'Loyalty Member',
+    department: 'Software Engineering Student'
   });
 
   notifications = signal([
-    { id: 1, title: 'Maintenance Required', message: 'Station PC-05 needs a thermal paste update.', type: 'warning' },
-    { id: 2, title: 'Session Ending', message: 'User Alex Gaming (PC-01) has 5 minutes left.', type: 'info' },
-    { id: 3, title: 'High Load Alert', message: '90% of gaming stations are occupied.', type: 'critical' }
+    { id: 1, title: 'Booking Confirmed', message: 'Your gaming slot for 14:00 is ready!', type: 'success' },
+    { id: 2, title: 'Low Points Alert', message: 'Earn 110 more points for a free hour.', type: 'info' }
   ]);
 
   toasts = signal<any[]>([]);
   aiMessages = signal<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: 'Welcome to Kivoc Denamic Technology. I am your operations assistant. How can I help with the hub today?' }
+    { role: 'bot', text: 'Welcome back Sarah! How can I help you with your Hub experience today?' }
   ]);
+
 
   constructor() {
     effect(() => {
@@ -98,9 +126,48 @@ export class App implements AfterViewInit {
     this.showToast(`Session ${id} marked as ${status}`, 'info', '📋');
   }
 
+  // Auth Actions
+  getStarted() {
+    this.isLandingPage.set(false);
+    this.showToast('Welcome to the Gateway', 'info', '🔓');
+  }
+
+  login() {
+    this.isLoggedIn.set(true);
+    this.showToast('Access Granted. Welcome back!', 'success', '🚀');
+    this.setView('dashboard');
+  }
+
+  logout() {
+    this.isLoggedIn.set(false);
+    this.isLandingPage.set(true);
+    this.showToast('Logged out safely', 'info', '🔒');
+  }
+
   toggleProfileModal() {
     this.isProfileModalOpen.update((v: boolean) => !v);
   }
+
+  addFunds(amount: number) {
+    this.showToast(`Adding R${amount} to your wallet...`, 'success', '💳');
+    // In a real app, this would call the service to update the signal
+    this.showToast('Wallet balance updated', 'info', '✅');
+  }
+
+  subscribeMembership(tier: string) {
+    this.showToast(`Activating ${tier} membership...`, 'success', '🎖️');
+    this.showToast('Membership active! Enjoy your perks.', 'info', '✨');
+  }
+
+  submitSupportTicket(subject: string) {
+    if (!subject) return;
+    this.showToast('Submitting support ticket...', 'info', '💬');
+    setTimeout(() => {
+      this.showToast('Ticket #TIC-' + Math.floor(Math.random() * 1000) + ' created', 'success', '✅');
+    }, 1500);
+  }
+
+
 
   saveProfile(name: string, role: string, dept: string) {
     this.adminProfile.set({ name, role, department: dept });
@@ -158,19 +225,42 @@ export class App implements AfterViewInit {
     setTimeout(() => this.scrollAIChat(), 0);
 
     setTimeout(() => {
-      let response = "I'm checking the current floor status for you.";
+      let response = "I'm checking the current floor status and business metrics for you.";
       const lowText = text.toLowerCase();
+      const plan = this.businessPlan();
+
       if (lowText.includes('station') || lowText.includes('free')) {
         const free = this.stations().filter((s: any) => s.status === 'Available').length;
-        response = `There are currently ${free} stations available. I recommend PC-02 for gaming as it has the best specs.`;
-      } else if (lowText.includes('session') || lowText.includes('user')) {
-        response = `We have ${this.sessions().length} active sessions. 2 sessions are nearing their end time.`;
+        response = `There are currently ${free} stations available. I recommend PC-02 for gaming (R${plan.pricing.gaming_hour}/hr).`;
+      } else if (lowText.includes('price') || lowText.includes('cost') || lowText.includes('rate')) {
+        response = `Our current rates are: Internet R${plan.pricing.internet_hour}/hr, Gaming R${plan.pricing.gaming_hour}/hr, B&W Print R${plan.pricing.print_bw}/pg, CV Typing R${plan.pricing.cv_typing}.`;
+      } else if (lowText.includes('revenue') || lowText.includes('target') || lowText.includes('money')) {
+        response = `We are at 72% of our monthly R50,000 revenue target. We need approximately R14,000 more to hit the goal.`;
+      } else if (lowText.includes('service') || lowText.includes('offer')) {
+        response = "We offer High-Speed Internet, Printing, CV Typing, Online Job Applications, Gaming, and Passport Photos.";
+      } else if (lowText.includes('plan') || lowText.includes('business')) {
+        response = `Our plan focuses on students and job seekers in Atteridgeville. We operate 15 PCs on a 200Mbps fibre line with full power backup.`;
+      } else if (lowText.includes('project') || lowText.includes('client') || lowText.includes('agency')) {
+        const active = this.clientProjects().filter((p: any) => p.status !== 'Launched').length;
+        response = `We have ${active} active agency projects. Our biggest current contract is a Web Design project for R4,500.`;
+      } else if (lowText.includes('loyalty') || lowText.includes('point') || lowText.includes('member')) {
+        const top = this.loyaltyMembers()[2]; // Sarah
+        response = `${top.name} is our top loyalty member with ${top.points} points. Loyalty members get 1 hour free for every 10 hours purchased.`;
+      } else if (lowText.includes('wallet') || lowText.includes('balance') || lowText.includes('money')) {
+        response = `Your current Hub Wallet balance is R${this.wallet().balance}. You can top up at the front desk or via the Wallet tab.`;
+      } else if (lowText.includes('print') || lowText.includes('upload')) {
+        response = `You can upload documents in the Printing tab. We offer A4/A3, B&W (R2/pg) and Color (R10/pg).`;
+      } else if (lowText.includes('gaming') || lowText.includes('game') || lowText.includes('tournament')) {
+        response = `Join our upcoming FIFA 26 tournament on Feb 28! We have RTX 4080 rigs and 240Hz monitors for the best experience.`;
       }
+
+
 
       this.aiMessages.update((msgs: any[]) => [...msgs, { role: 'bot', text: response }]);
       setTimeout(() => this.scrollAIChat(), 0);
     }, 1000);
   }
+
 
   private scrollTerminal() {
     if (this.terminalElement) {
@@ -203,20 +293,24 @@ export class App implements AfterViewInit {
             datasets: [
               {
                 label: 'Occupancy %',
-                data: [10, 35, 60, 85, 75, 95, 90, 40],
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                data: [15, 45, 75, 90, 80, 100, 95, 50],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.15)',
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: '#3b82f6'
               }
             ]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
             scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(75, 85, 99, 0.1)' }, ticks: { color: '#9ca3af' } },
-              x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+              x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
             }
           }
         });
@@ -231,8 +325,9 @@ export class App implements AfterViewInit {
             datasets: [{
               label: 'Daily Revenue (R)',
               data: [1200, 1500, 1100, 1800, 2500, 3500, 2800],
-              backgroundColor: 'rgba(59, 130, 246, 0.6)',
-              borderRadius: 4
+              backgroundColor: '#10b981',
+              borderRadius: 6,
+              hoverBackgroundColor: '#059669'
             }]
           },
           options: {
@@ -240,14 +335,15 @@ export class App implements AfterViewInit {
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(75, 85, 99, 0.1)' }, ticks: { color: '#9ca3af' } },
-              x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+              x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
             }
           }
         });
       }
     }, 100);
   }
+
 
   getSessionsByStatus(status: string) {
     return this.sessions().filter((i: Session) => i.status === status);
