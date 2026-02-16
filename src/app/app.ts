@@ -1,6 +1,6 @@
 import { Component, signal, effect, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SecurityService, Incident } from './security.service';
+import { CafeService, Session } from './security.service'; // Keeping filename for now to avoid breaking imports elsewhere if any
 
 declare var Chart: any;
 
@@ -15,39 +15,39 @@ export class App implements AfterViewInit {
   @ViewChild('systemTerminal') terminalElement!: ElementRef;
   @ViewChild('aiChatBody') aiChatBody!: ElementRef;
 
-  private securityService = inject(SecurityService);
+  private cafeService = inject(CafeService);
 
   // Expose service signals to template
-  incidents = this.securityService.incidents;
-  threats = this.securityService.threats;
-  vulnerabilities = this.securityService.vulnerabilities;
-  logs = this.securityService.logs;
-  threatLevel = this.securityService.threatLevel;
-  complianceFrameworks = this.securityService.complianceFrameworks;
+  sessions = this.cafeService.sessions;
+  stations = this.cafeService.stations;
+  bookings = this.cafeService.bookings;
+  logs = this.cafeService.logs;
+  loadLevel = this.cafeService.loadLevel;
+  performanceMetrics = this.cafeService.performanceMetrics;
 
   // Local UI State
   currentView = signal('dashboard');
   isAlertPanelOpen = signal(false);
   isAIPanelOpen = signal(false);
   isModalOpen = signal(false);
-  selectedIncident = signal<Incident | null>(null);
-  
+  selectedSession = signal<Session | null>(null);
+
   isProfileModalOpen = signal(false);
   adminProfile = signal({
-    name: 'Admin',
-    role: 'Security Analyst',
-    department: 'Cyber Operations'
+    name: 'Cafe Admin',
+    role: 'Operations Manager',
+    department: 'Front Desk'
   });
 
   notifications = signal([
-    { id: 1, title: 'Critical Threat Detected', message: 'Zero-day exploit attempt on HR Database.', type: 'critical' },
-    { id: 2, title: 'Unusual Traffic Pattern', message: 'Spike in outbound traffic from workstation-7.', type: 'warning' },
-    { id: 3, title: 'Compliance Alert', message: 'NIST framework audit nearing deadline.', type: 'info' }
+    { id: 1, title: 'Maintenance Required', message: 'Station PC-05 needs a thermal paste update.', type: 'warning' },
+    { id: 2, title: 'Session Ending', message: 'User Alex Gaming (PC-01) has 5 minutes left.', type: 'info' },
+    { id: 3, title: 'High Load Alert', message: '90% of gaming stations are occupied.', type: 'critical' }
   ]);
 
   toasts = signal<any[]>([]);
   aiMessages = signal<{ role: 'user' | 'bot', text: string }[]>([
-    { role: 'bot', text: 'Hello Analyst. I am CyberSentinel AI. How can I help you secure the perimeter today?' }
+    { role: 'bot', text: 'Welcome to Kivoc Denamic Technology. I am your operations assistant. How can I help with the hub today?' }
   ]);
 
   constructor() {
@@ -57,9 +57,8 @@ export class App implements AfterViewInit {
       }
     });
 
-    // Handle terminal auto-scroll when logs change
     effect(() => {
-      this.logs(); // Dependency
+      this.logs();
       setTimeout(() => this.scrollTerminal(), 0);
     });
   }
@@ -68,7 +67,6 @@ export class App implements AfterViewInit {
     this.initCharts();
   }
 
-  // Actions
   setView(view: string) {
     this.currentView.set(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -86,8 +84,8 @@ export class App implements AfterViewInit {
     setTimeout(() => this.scrollAIChat(), 100);
   }
 
-  openIncident(incident: Incident) {
-    this.selectedIncident.set(incident);
+  openSession(session: Session) {
+    this.selectedSession.set(session);
     this.isModalOpen.set(true);
   }
 
@@ -95,13 +93,13 @@ export class App implements AfterViewInit {
     this.isModalOpen.set(false);
   }
 
-  updateIncidentStatus(id: string, status: any) {
-    this.securityService.updateIncidentStatus(id, status);
-    this.showToast(`Incident ${id} moved to ${status}`, 'info', '📋');
+  updateSessionStatus(id: string, status: any) {
+    this.cafeService.updateSessionStatus(id, status);
+    this.showToast(`Session ${id} marked as ${status}`, 'info', '📋');
   }
 
   toggleProfileModal() {
-    this.isProfileModalOpen.update(v => !v);
+    this.isProfileModalOpen.update((v: boolean) => !v);
   }
 
   saveProfile(name: string, role: string, dept: string) {
@@ -115,60 +113,61 @@ export class App implements AfterViewInit {
     this.showToast('All notifications cleared', 'success', '🧹');
   }
 
-  search(event: any) {
+  search(event: Event) {
     const query = (event.target as HTMLInputElement).value;
     if (query) {
       this.showToast(`Searching for "${query}"...`, 'info', '🔎');
     }
   }
 
-  performThreatAction(threat: any) {
-    this.showToast(`Analyzing threat ${threat.id}...`, 'warning', '🧪');
+  performStationAction(station: any) {
+    this.showToast(`Running diagnostics on ${station.id}...`, 'warning', '🔧');
     setTimeout(() => {
-      this.showToast(`Threat ${threat.id} has been isolated`, 'success', '🛡️');
+      this.showToast(`Diagnostics for ${station.id} completed. System healthy.`, 'success', '✅');
     }, 2000);
   }
 
   generateReport() {
-    this.showToast('Compiling security metrics...', 'info', '📊');
+    this.showToast('Compiling daily revenue and occupancy report...', 'info', '📊');
     setTimeout(() => {
       this.showToast('Report generated successfully', 'success', '✅');
     }, 3000);
   }
 
-  isolateSystem() {
-    const id = this.selectedIncident()?.id;
-    this.showToast(`Initiating isolation for ${id}...`, 'critical', '🔒');
+  lockStation() {
+    const id = this.selectedSession()?.stationId;
+    this.showToast(`Locking station ${id}...`, 'critical', '🔒');
     setTimeout(() => {
-      this.showToast(`System ${id} successfully isolated from network`, 'success', '🛡️');
-      this.closeModal();
-    }, 2500);
-  }
-
-  escalateIncident() {
-    this.showToast('Escalating to Level 2 security response team...', 'warning', '📢');
-    setTimeout(() => {
-      this.showToast('Escalation confirmed', 'info', '📤');
+      this.showToast(`Station ${id} locked. Session suspended.`, 'success', '🛡️');
       this.closeModal();
     }, 1500);
   }
 
+  extendSession() {
+    this.showToast('Adding 30 minutes to session...', 'warning', '⏳');
+    setTimeout(() => {
+      this.showToast('Session extended by 30m', 'info', '⌛');
+      this.closeModal();
+    }, 1000);
+  }
+
   sendAIMessage(text: string) {
     if (!text.trim()) return;
-    
-    this.aiMessages.update(msgs => [...msgs, { role: 'user', text }]);
+
+    this.aiMessages.update((msgs: any[]) => [...msgs, { role: 'user', text }]);
     setTimeout(() => this.scrollAIChat(), 0);
 
-    // Simple bot logic
     setTimeout(() => {
-      let response = "I'm analyzing the data patterns for you.";
-      if (text.toLowerCase().includes('threat')) {
-        response = `Current threat level is ${this.threatLevel().toFixed(1)}%. I recommend reviewing the latest DDoS attempts from ${this.threats()[0].source}.`;
-      } else if (text.toLowerCase().includes('incident')) {
-        response = `There are ${this.incidents().length} active incidents. The most critical is ${this.incidents()[1].type}.`;
+      let response = "I'm checking the current floor status for you.";
+      const lowText = text.toLowerCase();
+      if (lowText.includes('station') || lowText.includes('free')) {
+        const free = this.stations().filter((s: any) => s.status === 'Available').length;
+        response = `There are currently ${free} stations available. I recommend PC-02 for gaming as it has the best specs.`;
+      } else if (lowText.includes('session') || lowText.includes('user')) {
+        response = `We have ${this.sessions().length} active sessions. 2 sessions are nearing their end time.`;
       }
-      
-      this.aiMessages.update(msgs => [...msgs, { role: 'bot', text: response }]);
+
+      this.aiMessages.update((msgs: any[]) => [...msgs, { role: 'bot', text: response }]);
       setTimeout(() => this.scrollAIChat(), 0);
     }, 1000);
   }
@@ -187,26 +186,26 @@ export class App implements AfterViewInit {
 
   private showToast(message: string, type: string = 'info', icon: string = 'ℹ️') {
     const id = Date.now();
-    this.toasts.update(t => [...t, { id, message, type, icon }]);
+    this.toasts.update((t: any[]) => [...t, { id, message, type, icon }]);
     setTimeout(() => {
-      this.toasts.update(t => t.filter(toast => toast.id !== id));
+      this.toasts.update((t: any[]) => t.filter((toast: any) => toast.id !== id));
     }, 4000);
   }
 
   private initCharts() {
     setTimeout(() => {
-      const timelineCtx = document.getElementById('threatTimelineChart') as any;
+      const timelineCtx = document.getElementById('occupancyTimelineChart') as any;
       if (timelineCtx) {
         new Chart(timelineCtx, {
           type: 'line',
           data: {
-            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+            labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
             datasets: [
               {
-                label: 'Critical Threats',
-                data: [12, 19, 3, 5, 2, 3, 10],
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                label: 'Occupancy %',
+                data: [10, 35, 60, 85, 75, 95, 90, 40],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 fill: true,
                 tension: 0.4
               }
@@ -223,15 +222,15 @@ export class App implements AfterViewInit {
         });
       }
 
-      const trafficCtx = document.getElementById('networkTrafficChart') as any;
+      const trafficCtx = document.getElementById('revenueChart') as any;
       if (trafficCtx) {
         new Chart(trafficCtx, {
           type: 'bar',
           data: {
-            labels: ['Node 1', 'Node 2', 'Node 3', 'Node 4', 'Node 5'],
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             datasets: [{
-              label: 'Traffic Vol (GB)',
-              data: [65, 59, 80, 81, 56],
+              label: 'Daily Revenue (R)',
+              data: [1200, 1500, 1100, 1800, 2500, 3500, 2800],
               backgroundColor: 'rgba(59, 130, 246, 0.6)',
               borderRadius: 4
             }]
@@ -250,7 +249,8 @@ export class App implements AfterViewInit {
     }, 100);
   }
 
-  getIncidentsByStatus(status: string) {
-    return this.incidents().filter((i: Incident) => i.status === status);
+  getSessionsByStatus(status: string) {
+    return this.sessions().filter((i: Session) => i.status === status);
   }
 }
+

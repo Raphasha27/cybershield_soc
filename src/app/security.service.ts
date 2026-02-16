@@ -1,31 +1,30 @@
 import { Injectable, signal, computed } from '@angular/core';
 
-export interface Incident {
+export interface Station {
   id: string;
-  type: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  type: 'Gaming PC' | 'Standard PC' | 'Mac' | 'Console';
+  status: 'Available' | 'Occupied' | 'Maintenance' | 'Reserved';
+  currentUser?: string;
+  timeRemaining?: string;
+  specs: string;
+}
+
+export interface Session {
+  id: string;
+  stationId: string;
+  user: string;
+  plan: 'Hourly' | 'Daily' | 'Guest';
+  startTime: string;
+  status: 'active' | 'pending' | 'ending' | 'completed';
+}
+
+export interface Booking {
+  id: string;
+  user: string;
+  stationType: string;
   time: string;
-  description: string;
-  status: 'detected' | 'investigating' | 'containing' | 'resolved';
-}
-
-export interface Threat {
-  id: string;
-  type: string;
-  severity: string;
-  source: string;
-  target: string;
-  detected: string;
-  status: string;
-}
-
-export interface Vulnerability {
-  id: string;
-  title: string;
-  severity: string;
-  score: number;
-  systems: number;
-  description: string;
+  duration: string;
+  status: 'Confirmed' | 'Pending' | 'Cancelled';
 }
 
 export interface LogEntry {
@@ -37,78 +36,72 @@ export interface LogEntry {
 @Injectable({
   providedIn: 'root'
 })
-export class SecurityService {
+export class CafeService {
   // Signals for state
-  private _incidents = signal<Incident[]>([
-    { id: 'INC-2025-001', type: 'Brute Force Attack', severity: 'high', time: '14:23:45', description: 'Repetitive failed login attempts detected on SSH port 22.', status: 'investigating' },
-    { id: 'INC-2025-002', type: 'Malware Detected', severity: 'critical', time: '13:45:12', description: 'Known ransomware signature detected on Workstation-42.', status: 'containing' },
-    { id: 'INC-2025-003', type: 'Data Exfiltration', severity: 'critical', time: '12:10:05', description: 'Unusual outbound traffic spike to unknown IP in Russia.', status: 'detected' },
-    { id: 'INC-2025-004', type: 'SQL Injection', severity: 'medium', time: '11:30:22', description: 'Potentially malicious SQL query detected on web server.', status: 'investigating' },
-    { id: 'INC-2025-005', type: 'Phishing Alert', severity: 'low', time: '09:15:33', description: 'Multiple users reporting suspicious email with malicious link.', status: 'resolved' }
+  private _sessions = signal<Session[]>([
+    { id: 'SES-001', stationId: 'PC-01', user: 'Alex Gaming', plan: 'Hourly', startTime: '14:23:45', status: 'active' },
+    { id: 'SES-002', stationId: 'PC-07', user: 'Sarah Connor', plan: 'Daily', startTime: '13:45:12', status: 'active' },
+    { id: 'SES-003', stationId: 'PS5-01', user: 'John Doe', plan: 'Guest', startTime: '12:10:05', status: 'pending' },
+    { id: 'SES-004', stationId: 'PC-12', user: 'Mike Ross', plan: 'Hourly', startTime: '11:30:22', status: 'ending' },
+    { id: 'SES-005', stationId: 'MAC-03', user: 'Rachel Zane', plan: 'Hourly', startTime: '09:15:33', status: 'completed' }
   ]);
 
-  private _threats = signal<Threat[]>([
-    { id: 'TH-882', type: 'DDoS Attempt', severity: 'high', source: '103.45.12.8', target: 'Load Balancer A', detected: '2025-12-30 14:05', status: 'Active' },
-    { id: 'TH-883', type: 'Port Scan', severity: 'medium', source: '185.122.3.44', target: 'DMZ Gateway', detected: '2025-12-30 14:12', status: 'Investigating' },
-    { id: 'TH-884', type: 'Account Takeover', severity: 'high', source: 'Internal', target: 'CEO Email', detected: '2025-12-30 14:30', status: 'Active' },
-    { id: 'TH-885', type: 'Zero-day Exploit', severity: 'critical', source: '210.33.5.1', target: 'HR Database', detected: '2025-12-30 15:00', status: 'Active' },
-    { id: 'TH-886', type: 'Policy Violation', severity: 'low', source: '192.168.1.15', target: 'Internal File Server', detected: '2025-12-30 15:15', status: 'Mitigated' }
+  private _stations = signal<Station[]>([
+    { id: 'PC-01', type: 'Gaming PC', status: 'Occupied', currentUser: 'Alex Gaming', timeRemaining: '45m', specs: 'RTX 4080, 32GB' },
+    { id: 'PC-02', type: 'Gaming PC', status: 'Available', specs: 'RTX 4080, 32GB' },
+    { id: 'PC-07', type: 'Gaming PC', status: 'Occupied', currentUser: 'Sarah Connor', timeRemaining: '3h 12m', specs: 'RTX 3070, 16GB' },
+    { id: 'PS5-01', type: 'Console', status: 'Reserved', specs: 'PlayStation 5' },
+    { id: 'MAC-03', type: 'Mac', status: 'Maintenance', specs: 'M2 Pro, 16GB' }
   ]);
 
-  private _vulnerabilities = signal<Vulnerability[]>([
-    { id: 'CVE-2024-38063', title: 'Windows TCP/IP Remote Code Execution', severity: 'critical', score: 9.8, systems: 15, description: 'A critical vulnerability in Windows TCP/IP that allows for remote code execution.' },
-    { id: 'CVE-2024-43451', title: 'NTLM Hash Disclosure Vulnerability', severity: 'high', score: 8.1, systems: 42, description: 'Information disclosure vulnerability that could lead to NTLM hash theft.' },
-    { id: 'CVE-2023-4863', title: 'Heap Buffer Overflow in libwebp', severity: 'high', score: 8.8, systems: 120, description: 'Critical vulnerability in libwebp that affects browsers and many applications.' },
-    { id: 'CVE-2024-21412', title: 'Internet Explorer Shortcut File Security Bypass', severity: 'medium', score: 6.5, systems: 8, description: 'Vulnerability that allows attackers to bypass security warnings.' }
+  private _bookings = signal<Booking[]>([
+    { id: 'BK-101', user: 'David Smith', stationType: 'Gaming PC', time: '18:00', duration: '2h', status: 'Confirmed' },
+    { id: 'BK-102', user: 'Emma Wilson', stationType: 'Console', time: '19:30', duration: '4h', status: 'Pending' },
+    { id: 'BK-103', user: 'James Bond', stationType: 'Standard PC', time: '20:00', duration: '1h', status: 'Confirmed' }
   ]);
 
-  private _complianceFrameworks = signal<any[]>([
-    { name: 'ISO 27001', score: 87, status: '13 controls require attention' },
-    { name: 'NIST CSF', score: 92, status: '8 controls require attention' },
-    { name: 'PCI DSS', score: 78, status: '22 controls require attention' },
-    { name: 'GDPR', score: 95, status: '5 controls require attention' }
+  private _performanceMetrics = signal<any[]>([
+    { name: 'Peak Occupancy', score: 92, status: 'Historical high this week' },
+    { name: 'Revenue Target', score: 78, status: 'R15,400 remaining for month' },
+    { name: 'System Uptime', score: 99.9, status: 'All servers nominal' },
+    { name: 'Customer Rating', score: 95, status: 'Based on 450 reviews' }
   ]);
 
   private _logs = signal<LogEntry[]>([]);
-  private _threatLevel = signal<number>(68);
+  private _loadLevel = signal<number>(65);
 
   // Read-only accessors
-  incidents = this._incidents.asReadonly();
-  threats = this._threats.asReadonly();
-  vulnerabilities = this._vulnerabilities.asReadonly();
-  complianceFrameworks = this._complianceFrameworks.asReadonly();
+  sessions = this._sessions.asReadonly();
+  stations = this._stations.asReadonly();
+  bookings = this._bookings.asReadonly();
+  performanceMetrics = this._performanceMetrics.asReadonly();
   logs = this._logs.asReadonly();
-  threatLevel = this._threatLevel.asReadonly();
-
-  // Computed signals
-  criticalIncidentCount = computed(() => this._incidents().filter((i: Incident) => i.severity === 'critical').length);
+  loadLevel = this._loadLevel.asReadonly();
 
   constructor() {
     this.startSimulation();
   }
 
   private startSimulation() {
-    // Log simulation
     const logTemplates: Omit<LogEntry, 'timestamp'>[] = [
-      { level: 'info', msg: 'System integrity check: [OK]' },
-      { level: 'warn', msg: 'Brute force attempt detected on port 22' },
-      { level: 'error', msg: 'Unauthorized subnet scan aborted' },
-      { level: 'info', msg: 'Neural threat patterns updated' },
-      { level: 'warn', msg: 'Suspicious DNS query: xf-99.bit' }
+      { level: 'info', msg: 'New guest session started on PC-04' },
+      { level: 'warn', msg: 'Station PC-09 reporting high temperature' },
+      { level: 'error', msg: 'Printer connection lost in Zone B' },
+      { level: 'info', msg: 'Payment processed for SES-008' },
+      { level: 'warn', msg: 'Low storage warning on Game Server 1' }
     ];
 
     setInterval(() => {
       const template = logTemplates[Math.floor(Math.random() * logTemplates.length)];
       this.addLog(template.level, template.msg);
-    }, 4000);
+    }, 5000);
 
-    // Threat level fluctuation
     setInterval(() => {
-      this._threatLevel.update((v: number) => {
-        const change = (Math.random() - 0.5) * 4;
+      this._loadLevel.update((v: number) => {
+        const change = (Math.random() - 0.5) * 6;
         return Math.max(10, Math.min(100, v + change));
       });
-    }, 3000);
+    }, 4000);
   }
 
   addLog(level: LogEntry['level'], msg: string) {
@@ -116,9 +109,10 @@ export class SecurityService {
     this._logs.update((current: LogEntry[]) => [...current.slice(-49), { level, msg, timestamp }]);
   }
 
-  updateIncidentStatus(id: string, status: Incident['status']) {
-    this._incidents.update((current: Incident[]) => 
-      current.map((i: Incident) => i.id === id ? { ...i, status } : i)
+  updateSessionStatus(id: string, status: Session['status']) {
+    this._sessions.update((current: Session[]) => 
+      current.map((i: Session) => i.id === id ? { ...i, status } : i)
     );
   }
 }
+

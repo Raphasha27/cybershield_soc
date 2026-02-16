@@ -1,41 +1,94 @@
-<!-- Header -->
-<header class="header">
-  <div class="header-content">
-    <div class="logo-section">
-      <div class="logo-icon">🛡️</div>
+@if (isLandingPage()) {
+<div class="landing-page glass">
+  <div class="landing-content">
+    <div class="logo-section large">
+      <div class="logo-icon">💻</div>
       <div class="logo-text">
-        <h1>CyberShield</h1>
-        <span class="logo-subtitle">Security Operations Center</span>
+        <h1 class="text-gradient">KDT Cafe</h1>
+        <p>Your Gateway to the Digital World in Pretoria West</p>
       </div>
     </div>
-    
+
+    <div class="landing-hero">
+      <h2>Empowering the Community with High-Speed Tech</h2>
+      <p>Join the hub for gaming, digital projects, and professional training.</p>
+      <div class="landing-features">
+        <div class="feature glass">⚡ 200Mbps Fibre</div>
+        <div class="feature glass">🔋 Full Power Backup</div>
+        <div class="feature glass">🎮 RTX 4080 Gaming</div>
+      </div>
+      <button class="action-btn primary large mt-xl" (click)="getStarted()">Explore The Hub</button>
+    </div>
+  </div>
+</div>
+} @else if (!isLoggedIn()) {
+<div class="login-page">
+  <div class="login-card glass">
+    <div class="login-header">
+      <h2 class="text-gradient">Hub Login</h2>
+      <p>Log in to access your dashboard and bookings</p>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>Member ID / Email</label>
+        <input type="text" placeholder="e.g. sarah@kdtcafe.co.za" value="sarah@kdtcafe.co.za">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••" value="password123">
+      </div>
+      <button class="action-btn primary" style="width: 100%;" (click)="login()">Enter The Hub</button>
+      <p class="text-xs text-muted mt-md">Mock login enabled for preview. Just click "Enter".</p>
+    </div>
+  </div>
+</div>
+} @else {
+<header class="header">
+  <div class="header-content">
+    <div class="logo-section" (click)="setView('dashboard')" style="cursor: pointer;">
+      <div class="logo-icon">💻</div>
+      <div class="logo-text">
+        <h1>KDT Cafe</h1>
+        <span class="logo-location">📍 Pretoria West Hub</span>
+      </div>
+    </div>
+
+
     <nav class="main-nav">
       <button class="nav-btn" [class.active]="currentView() === 'dashboard'" (click)="setView('dashboard')">
-        <span class="nav-icon">📊</span>
-        Dashboard
+        <span class="nav-icon">🏠</span> Welcome
       </button>
-      <button class="nav-btn" [class.active]="currentView() === 'threats'" (click)="setView('threats')">
-        <span class="nav-icon">⚠️</span>
-        Threats
+      <button class="nav-btn" [class.active]="currentView() === 'stations'" (click)="setView('stations')">
+        <span class="nav-icon">🖥️</span> Floor
       </button>
-      <button class="nav-btn" [class.active]="currentView() === 'incidents'" (click)="setView('incidents')">
-        <span class="nav-icon">🚨</span>
-        Incidents
+      <button class="nav-btn" [class.active]="currentView() === 'bookings'" (click)="setView('bookings')">
+        <span class="nav-icon">📅</span> Spots
       </button>
-      <button class="nav-btn" [class.active]="currentView() === 'vulnerabilities'" (click)="setView('vulnerabilities')">
-        <span class="nav-icon">🔍</span>
-        Vulnerabilities
+      <button class="nav-btn" [class.active]="currentView() === 'wallet'" (click)="setView('wallet')">
+        <span class="nav-icon">💳</span> Wallet
       </button>
-      <button class="nav-btn" [class.active]="currentView() === 'compliance'" (click)="setView('compliance')">
-        <span class="nav-icon">📋</span>
-        Compliance
+      <button class="nav-btn" [class.active]="currentView() === 'printing'" (click)="setView('printing')">
+        <span class="nav-icon">🖨️</span> Print
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'lounge'" (click)="setView('lounge')">
+        <span class="nav-icon">🎮</span> Lounge
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'agency'" (click)="setView('agency')">
+        <span class="nav-icon">🚀</span> Agency
+      </button>
+      <button class="nav-btn" [class.active]="currentView() === 'support'" (click)="setView('support')">
+        <span class="nav-icon">💬</span> Help
       </button>
     </nav>
-    
+
+
     <div class="header-actions">
-      <div class="search-bar">
-        <input type="text" placeholder="Search security events..." (keyup.enter)="search($event)">
-        <span class="search-icon">🔎</span>
+      <!-- Wallet Balance Chip -->
+      <div class="wallet-chip glass clickable" (click)="setView('wallet')"
+        style="padding: 0.5rem 1rem; border-radius: var(--radius-full); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <span class="wallet-icon">💳</span>
+        <span class="wallet-balance" style="font-weight: 800; color: var(--color-primary);">R{{wallet().balance}}</span>
       </div>
       <button class="alert-btn" (click)="toggleAlertPanel()">
         <span class="alert-icon">🔔</span>
@@ -44,400 +97,529 @@
       <button class="ai-toggle-btn" (click)="toggleAI()">
         <span class="ai-icon">🤖</span>
       </button>
-      <button class="user-profile-btn" (click)="toggleProfileModal()">
+      <button class="user-profile-btn" (click)="setView('account')">
         <div class="user-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="Admin">
-          <span class="user-name">{{adminProfile().name}}</span>
+          <img [src]="currentUser().avatar" alt="User">
+          <span class="user-name">{{currentUser().name}}</span>
         </div>
       </button>
     </div>
+
   </div>
 </header>
 
-<!-- Main Content -->
 <main class="main-content">
-  
-  <!-- Dashboard View -->
+
+  <!-- Customer Welcome Hub -->
   @if (currentView() === 'dashboard') {
-    <section class="view active">
-      <div class="threat-banner">
-        <div class="threat-banner-content">
-          <div class="threat-level">
-            <span class="threat-icon">⚡</span>
-            <div class="threat-info">
-              <div class="threat-title-row">
-                <h3>Current Threat Level: <span class="threat-status" [style.color]="threatLevel() > 70 ? 'var(--color-critical)' : 'var(--color-warning)'">
-                  {{ threatLevel() > 80 ? 'CRITICAL' : (threatLevel() > 60 ? 'ELEVATED' : 'MODERATE') }} ({{ threatLevel().toFixed(1) }}%)
-                </span></h3>
-                <button class="action-btn primary small" (click)="setView('threats')">View Details</button>
-              </div>
-              <p>Real-time heuristic analysis active</p>
+  <section class="view active">
+    <!-- Hero Banner -->
+    <div class="threat-banner">
+      <div class="threat-banner-content">
+        <div class="threat-level">
+          <span class="threat-icon">⚡</span>
+          <div class="threat-info">
+            <div class="threat-title-row">
+              <h1 class="text-gradient">Welcome back, {{currentUser().name}}!</h1>
+              <button class="action-btn primary" (click)="setView('stations')">New Hub Session</button>
             </div>
-          </div>
-          <div class="threat-gauge">
-            <div class="gauge-fill" [style.width.%]="threatLevel()" [class.high]="threatLevel() > 70"></div>
+            <p>You have <strong>{{currentUser().points}} Hub Points</strong>. You're close to a free pizza! 🍕</p>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="metrics-grid">
-        <div class="metric-card critical" (click)="setView('threats')">
-          <div class="metric-header"><span class="metric-icon">🔴</span><h4>Critical Alerts</h4></div>
-          <div class="metric-value"><span class="value">23</span><span class="trend up">+12%</span></div>
-          <div class="metric-footer"><span class="metric-label">Last 24 hours</span></div>
+    <!-- Quick Stats for User -->
+    <div class="metrics-grid">
+      <div class="metric-card success" (click)="setView('stations')" style="cursor: pointer;">
+        <div class="metric-header"><span class="metric-icon">🎮</span>
+          <h4>Online Gaming</h4>
         </div>
-        <div class="metric-card warning" (click)="setView('incidents')">
-          <div class="metric-header"><span class="metric-icon">🟡</span><h4>Active Incidents</h4></div>
-          <div class="metric-value"><span class="value">47</span><span class="trend down">-8%</span></div>
-          <div class="metric-footer"><span class="metric-label">Requiring attention</span></div>
+        <div class="metric-value"><span class="value">{{ freeGamingPCs() }}</span><span class="text-sm">PCs Free</span>
         </div>
-        <div class="metric-card info" (click)="setView('vulnerabilities')">
-          <div class="metric-header"><span class="metric-icon">🔵</span><h4>Vulnerabilities</h4></div>
-          <div class="metric-value"><span class="value">156</span><span class="trend up">+5%</span></div>
-          <div class="metric-footer"><span class="metric-label">Unpatched systems</span></div>
+        <div class="metric-footer"><span class="metric-label">Join our 5v5 server</span></div>
+      </div>
+      <div class="metric-card info" (click)="setView('stations')" style="cursor: pointer;">
+        <div class="metric-header"><span class="metric-icon">🌐</span>
+          <h4>Browsing PCs</h4>
         </div>
-        <div class="metric-card success" (click)="setView('compliance')">
-          <div class="metric-header"><span class="metric-icon">🟢</span><h4>Systems Protected</h4></div>
-          <div class="metric-value"><span class="value">1,247</span><span class="trend neutral">0%</span></div>
-          <div class="metric-footer"><span class="metric-label">Network devices</span></div>
+        <div class="metric-value"><span class="value">{{ freeStandardPCs() }}</span><span class="text-sm">PCs
+            Free</span></div>
+        <div class="metric-footer"><span class="metric-label">High-speed browsing</span></div>
+      </div>
+      <div class="metric-card secondary" (click)="setView('wallet')" style="cursor: pointer;">
+        <div class="metric-header"><span class="metric-icon">💳</span>
+          <h4>Wallet Balance</h4>
         </div>
+        <div class="metric-value"><span class="value">R{{wallet().balance}}</span></div>
+        <div class="metric-footer"><span class="metric-label">Top-up Funds →</span></div>
+      </div>
+    </div>
+
+
+    <!-- Dual Section: Services & Bookings -->
+    <div class="dual-section">
+      <div class="section-card glass shadow-lg">
+        <div class="section-header">
+          <h2>🛠️ Hub Services</h2>
+        </div>
+        <div class="pricing-list">
+          @for (service of digitalServices().slice(0, 4); track service.name) {
+          <div class="price-item">
+            <span>{{service.icon}} {{service.name}}</span>
+            <strong>R{{service.price}}</strong>
+          </div>
+          }
+        </div>
+        <button class="action-btn secondary mt-md" style="width: 100%;" (click)="setView('printing')">Explore
+          Services</button>
       </div>
 
-      <div class="charts-grid">
-        <div class="chart-card large">
-          <div class="card-header">
-            <h3>Threat Activity Timeline</h3>
-            <div class="chart-controls">
-              <button class="chart-btn active">24H</button>
-              <button class="chart-btn">7D</button>
-              <button class="chart-btn">30D</button>
-            </div>
-          </div>
-          <div class="chart-container">
-            <canvas id="threatTimelineChart"></canvas>
-          </div>
+      <div class="section-card glass shadow-lg">
+        <div class="section-header">
+          <h2>📅 My Active Bookings</h2>
         </div>
+        <div class="vulnerabilities-list">
+          @for (booking of bookings().slice(0, 2); track booking.id) {
+          <div class="vuln-item available"
+            style="padding: 1rem; border-left: 4px solid var(--color-success); background: rgba(16, 185, 129, 0.05);">
+            <div style="font-weight: 700;">{{booking.serviceType}}</div>
+            <div class="text-xs text-muted">{{booking.time}} • Station {{booking.stationType}}</div>
+          </div>
+          }
+        </div>
+        <button class="action-btn primary mt-md" style="width: 100%;" (click)="setView('bookings')">Manage All
+          Bookings</button>
+      </div>
+    </div>
+  </section>
+  }
 
-        <div class="chart-card medium">
-          <div class="card-header"><h3>Attack Sources</h3></div>
-          <div class="attack-sources">
-            <div class="source-item">
-              <span class="country-flag">🇨🇳</span>
-              <span class="country-name">China</span>
-              <div class="source-bar"><div class="bar-fill" style="width: 78%"></div></div>
-              <span class="source-count">2,847</span>
-            </div>
-            <div class="source-item">
-              <span class="country-flag">🇷🇺</span>
-              <span class="country-name">Russia</span>
-              <div class="source-bar"><div class="bar-fill" style="width: 65%"></div></div>
-              <span class="source-count">2,341</span>
-            </div>
+  <!-- Interactive Floor Plan -->
+  @if (currentView() === 'stations') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>Hub Floor Plan</h2>
+      <div class="header-legend">
+        <span class="severity-badge available">Free</span>
+        <span class="severity-badge occupied">In Use</span>
+      </div>
+    </div>
+    <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      @for (station of stations(); track station.id) {
+      <div class="metric-card glass glow-on-hover" [style.opacity]="station.status === 'Available' ? 1 : 0.6">
+        <div class="metric-header">
+          <span class="metric-icon">{{ station.type.includes('Gaming') ? '🎮' : '💻' }}</span>
+          <span class="severity-badge" [class]="station.status.toLowerCase()">{{station.status}}</span>
+        </div>
+        <div class="metric-value mt-md">
+          <h3 style="font-size: 1.25rem;">{{station.id}}</h3>
+          <p class="text-xs text-muted">{{station.type}}</p>
+        </div>
+        @if (station.status === 'Available') {
+        <button class="action-btn primary small mt-md" style="width: 100%;"
+          (click)="setView('bookings')">Reserve</button>
+        } @else {
+        <button class="action-btn secondary small mt-md" style="width: 100%;" disabled>Busy</button>
+        }
+      </div>
+      }
+    </div>
+  </section>
+  }
+
+  <!-- My Spots -->
+  @if (currentView() === 'bookings') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>My Reservations</h2><button class="action-btn primary small">New Booking +</button>
+    </div>
+    <div class="compliance-frameworks">
+      @for (booking of bookings(); track booking.id) {
+      <div class="framework-card glass glow-on-hover">
+        <div class="framework-header">
+          <h3>{{booking.serviceType}}</h3>
+          <span class="severity-badge available">{{booking.status}}</span>
+        </div>
+        <div class="infra-list mt-md">
+          <div class="infra-item glass">Station: {{booking.stationType}}</div>
+          <div class="infra-item glass">Time: Today at {{booking.time}}</div>
+          <div class="infra-item glass">Allocated: {{booking.duration}}</div>
+        </div>
+        <button class="action-btn secondary small mt-md" style="width: 100%;">Modify Reservation</button>
+      </div>
+      }
+    </div>
+  </section>
+  }
+
+  <!-- Wallet Tab -->
+  @if (currentView() === 'wallet') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>Digital Wallet</h2>
+    </div>
+    <div class="dual-section">
+      <div class="section-card glass shadow-xl">
+        <div class="wallet-balance-large" style="text-align: center; padding: 2rem;">
+          <span class="text-muted">Available Balance</span>
+          <h1 class="text-gradient" style="font-size: 4rem;">R{{wallet().balance}}</h1>
+        </div>
+        <div class="wallet-actions mt-xl">
+          <h3>Top-up Funds</h3>
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button class="action-btn secondary small" (click)="addFunds(50)">+ R50</button>
+            <button class="action-btn secondary small" (click)="addFunds(100)">+ R100</button>
+            <button class="action-btn primary small" (click)="addFunds(500)">+ R500</button>
           </div>
         </div>
       </div>
-
-      <div class="dual-section">
-        <div class="section-card">
-          <div class="card-header">
-            <h3>Recent Security Incidents</h3>
-            <button class="view-all-btn" (click)="setView('incidents')">View All →</button>
-          </div>
-          <div class="incidents-list">
-            @for (inc of incidents().slice(0, 5); track inc.id) {
-              <div class="incident-item" [class]="inc.severity" (click)="openIncident(inc)">
-                <div class="incident-header">
-                  <span class="incident-title">{{inc.type}}</span>
-                  <span class="incident-time">{{inc.time}}</span>
-                </div>
-                <p class="incident-description">{{inc.id}}: {{inc.description}}</p>
-              </div>
+      <div class="section-card glass shadow-xl">
+        <h3>Transaction History</h3>
+        <div class="infra-list mt-md">
+          @for (tx of wallet().transactions; track tx.id) {
+          <div class="infra-item glass" style="justify-content: space-between; padding: 1rem;">
+            <div>
+              <div style="font-weight: 600;">{{tx.desc}}</div>
+              <div class="text-xs text-muted">{{tx.date}}</div>
+            </div>
+            <div [style.color]="tx.type === 'credit' ? 'var(--color-success)' : 'var(--color-danger)'"
+              style="font-weight: 800;">
+              {{tx.type === 'credit' ? '+' : '-'}}R{{(tx.amount < 0 ? -tx.amount : tx.amount)}} </div>
+            </div>
             }
           </div>
         </div>
+      </div>
+  </section>
+  }
 
-        <div class="section-card">
-          <div class="card-header">
-            <h3>Network Traffic Monitor</h3>
-            <span class="live-indicator">🔴 LIVE</span>
+  <!-- Printing Tab -->
+  @if (currentView() === 'printing') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>Advanced Printing Services</h2>
+    </div>
+    <div class="dual-section">
+      <div class="section-card glass">
+        <h3>Submit Print Job</h3>
+        <div class="login-form mt-md">
+          <div class="form-group">
+            <label>Upload Document (PDF, DOCX)</label>
+            <input type="file" class="glass"
+              style="width: 100%; border: 1px dashed var(--color-primary); padding: 2rem; text-align: center;">
           </div>
-          <div class="traffic-visualization">
-             <canvas id="networkTrafficChart"></canvas>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Print Type</label>
+              <select class="glass"
+                style="width: 100%; padding: 0.75rem; background: var(--color-bg-tertiary); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 4px;">
+                <option>Black & White (R2/pg)</option>
+                <option>Full Color (R10/pg)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Paper Size</label>
+              <select class="glass"
+                style="width: 100%; padding: 0.75rem; background: var(--color-bg-tertiary); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 4px;">
+                <option>A4 (Standard)</option>
+                <option>A3 (Large)</option>
+              </select>
+            </div>
           </div>
-          <div class="traffic-stats">
-            <div class="stat-item"><span class="stat-label">Inbound</span><span class="stat-value">2.4 GB/s</span></div>
-            <div class="stat-item"><span class="stat-label">Outbound</span><span class="stat-value">1.8 GB/s</span></div>
-            <div class="stat-item"><span class="stat-label">Blocked</span><span class="stat-value">347 MB/s</span></div>
+          <div class="form-group">
+            <label>Binding / Finishing</label>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+              <span class="severity-badge glass clickable">None</span>
+              <span class="severity-badge glass clickable">Staple</span>
+              <span class="severity-badge glass clickable">Spiral (R25)</span>
+            </div>
+          </div>
+          <button class="action-btn primary mt-md" style="width: 100%;">Calculate & Send to Printer</button>
+        </div>
+      </div>
+      <div class="section-card glass">
+        <h3>Print Job Tracking</h3>
+        <div class="vulnerabilities-list mt-md">
+          <div class="vuln-item available" style="border-left: 4px solid var(--color-success); padding: 1rem;">
+            <strong>Assignment_Final.pdf</strong>
+            <div class="text-xs text-muted">A4 • 12 pages • B&W</div>
+            <span class="severity-badge available mt-sm">In Queue</span>
           </div>
         </div>
       </div>
+    </div>
+  </section>
+  }
 
-      <div class="terminal-card">
-        <div class="terminal-header">
-          <div class="terminal-controls">
-            <span class="control-dot red"></span>
-            <span class="control-dot yellow"></span>
-            <span class="control-dot green"></span>
-          </div>
-          <div class="terminal-title">cybershield_soc_v2.0.0 -- angular_host -- (80x24)</div>
+  <!-- Gaming Lounge Tab -->
+  @if (currentView() === 'lounge') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>Elite Gaming Lounge</h2>
+    </div>
+    <div class="dual-section">
+      <div class="section-card glass">
+        <div class="section-header">
+          <h2>🏆 Tournaments</h2>
         </div>
-        <div class="terminal-body" #systemTerminal>
-          @for (log of logs(); track log.timestamp) {
-            <div class="log-line">
-              <span class="log-timestamp">[{{log.timestamp}}]</span>
-              <span class="log-tag" [class]="log.level">{{log.level.toUpperCase()}}</span>
-              <span class="log-message">{{log.msg}}</span>
+        <div class="infra-list mt-md">
+          @for (trn of tournaments(); track trn.id) {
+          <div class="infra-item glass" style="flex-direction: column; align-items: flex-start; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <strong style="font-size: 1.1rem;">{{trn.game}}</strong>
+              <span class="text-success">Prize: {{trn.prize}}</span>
             </div>
+            <div class="text-xs text-muted mt-xs">Date: {{trn.date}} • Entry: R{{trn.joinFee}}</div>
+            <div class="text-xs mt-sm" style="width: 100%;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span>Participants</span>
+                <span>{{trn.players}}/{{trn.maxPlayers}}</span>
+              </div>
+              <div style="height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px;">
+                <div [style.width.%]="(trn.players/trn.maxPlayers)*100"
+                  style="height: 100%; background: var(--color-primary); border-radius: 3px;"></div>
+              </div>
+            </div>
+            <button class="action-btn primary small mt-md" style="width: 100%;">Join Tournament</button>
+          </div>
           }
         </div>
       </div>
-    </section>
-  }
-
-  <!-- Threats View -->
-  @if (currentView() === 'threats') {
-    <section class="view active">
-      <div class="view-header"><h2>Threat Intelligence Center</h2></div>
-      <div class="threats-table-container">
-        <table class="threats-table">
-          <thead>
-            <tr>
-              <th>Threat ID</th>
-              <th>Type</th>
-              <th>Severity</th>
-              <th>Source IP</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (threat of threats(); track threat.id) {
-              <tr>
-                <td style="color: var(--color-primary)">{{threat.id}}</td>
-                <td>{{threat.type}}</td>
-                <td><span class="severity-badge" [class]="threat.severity">{{threat.severity}}</span></td>
-                <td>{{threat.source}}</td>
-                <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{threat.status}}</span></td>
-                <td><button class="table-action-btn" (click)="performThreatAction(threat)">Action</button></td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
-  }
-
-  <!-- Incidents View -->
-  @if (currentView() === 'incidents') {
-    <section class="view active">
-      <div class="view-header"><h2>Incident Response (Kanban)</h2></div>
-      <div class="incidents-kanban">
-        @for (status of ['detected', 'investigating', 'containing', 'resolved']; track status) {
-          <div class="kanban-column">
-            <div class="column-header" [class]="status">
-              <h4 style="text-transform: capitalize;">{{status}}</h4>
-              <span class="count">{{getIncidentsByStatus(status).length}}</span>
+      <div class="section-card glass">
+        <h3>Pro Gear Specs</h3>
+        <div class="metrics-grid mt-md" style="grid-template-columns: 1fr;">
+          <div class="metric-card glass" style="padding: 1rem; flex-direction: row; gap: 1rem; align-items: center;">
+            <span class="metric-icon" style="font-size: 2rem;">⚡</span>
+            <div>
+              <strong>RTX 4080 Rigs</strong>
+              <p class="text-xs text-muted">Ultra settings enabled for all top titles.</p>
             </div>
-            <div class="column-body">
-              @for (inc of getIncidentsByStatus(status); track inc.id) {
-                <div class="kanban-card">
-                  <div (click)="openIncident(inc)">
-                    <div class="kanban-card-header">
-                      <span class="kanban-card-id">{{inc.id}}</span>
-                      <span class="severity-badge" [class]="inc.severity">{{inc.severity}}</span>
-                    </div>
-                    <div class="kanban-card-title">{{inc.type}}</div>
-                  </div>
-                  
-                  <div class="kanban-card-actions">
-                    @if (status === 'detected') {
-                      <button (click)="updateIncidentStatus(inc.id, 'investigating')">Investigate →</button>
-                    }
-                    @if (status === 'investigating') {
-                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'detected')">← Reset</button>
-                      <button (click)="updateIncidentStatus(inc.id, 'containing')">Contain →</button>
-                    }
-                    @if (status === 'containing') {
-                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'investigating')">← Back</button>
-                      <button (click)="updateIncidentStatus(inc.id, 'resolved')">Resolve 🗸</button>
-                    }
-                    @if (status === 'resolved') {
-                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'containing')">← Reopen</button>
-                    }
-                  </div>
-                </div>
+          </div>
+          <div class="metric-card glass" style="padding: 1rem; flex-direction: row; gap: 1rem; align-items: center;">
+            <span class="metric-icon" style="font-size: 2rem;">🖥️</span>
+            <div>
+              <strong>240Hz Monitors</strong>
+              <p class="text-xs text-muted">Zowie Pro-grade panels for zero ghosting.</p>
+            </div>
+          </div>
+          <div class="metric-card glass" style="padding: 1rem; flex-direction: row; gap: 1rem; align-items: center;">
+            <span class="metric-icon" style="font-size: 2rem;">🎧</span>
+            <div>
+              <strong>HyperX Peripherals</strong>
+              <p class="text-xs text-muted">Cloud II headsets & mechanical keyboards.</p>
+            </div>
+          </div>
+        </div>
+        <button class="action-btn secondary small mt-md" style="width: 100%;" (click)="setView('stations')">Book a Pro
+          Station</button>
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- Agency & Academy -->
+  @if (currentView() === 'agency') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>Digital Academy & Agency</h2>
+    </div>
+    <div class="dual-section">
+      <div class="section-card glass shadow-lg">
+        <div class="section-header">
+          <h2>🎓 Upcoming Courses</h2><span class="severity-badge pending">Enrolling</span>
+        </div>
+        <div class="infra-list mt-md">
+          @for (course of trainingCourses(); track course.id) {
+          <div class="infra-item glass" style="flex-direction: column; align-items: flex-start; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <strong>{{course.title}}</strong>
+              <span class="text-success">R{{course.price}}</span>
+            </div>
+            <div class="text-xs text-muted mt-xs">Next Start: {{course.nextStartDate}} • {{course.slots}} seats left
+            </div>
+            <button class="action-btn primary small mt-sm" style="width: 100%;">Register Interest</button>
+          </div>
+          }
+        </div>
+      </div>
+      <div class="section-card glass shadow-lg">
+        <div class="section-header">
+          <h2>🚀 Agency Portfolio</h2>
+        </div>
+        <div class="vulnerabilities-list mt-md">
+          @for (project of clientProjects(); track project.id) {
+          <div class="vuln-item glass">
+            <strong>{{project.name}}</strong>
+            <div class="text-xs text-muted">{{project.description}}</div>
+            <div class="severity-badge available mt-sm">{{project.status}}</div>
+          </div>
+          }
+        </div>
+        <button class="action-btn secondary small mt-md" style="width: 100%;">View Full Case Studies</button>
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- Customer Support Tab -->
+  @if (currentView() === 'support') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>Hub Support</h2>
+    </div>
+    <div class="dual-section">
+      <div class="section-card glass">
+        <h3>Create Support Ticket</h3>
+        <div class="login-form mt-md">
+          <div class="form-group">
+            <label>What's the issue?</label>
+            <input type="text" #ticketBody placeholder="Describe your problem briefy..." class="glass"
+              style="width: 100%; padding: 0.75rem; background: var(--color-bg-tertiary); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 4px;">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select class="glass"
+              style="width: 100%; padding: 0.75rem; background: var(--color-bg-tertiary); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 4px;">
+              <option>Technical Issue</option>
+              <option>Billing / Wallet</option>
+              <option>Membership Perks</option>
+            </select>
+          </div>
+          <button class="action-btn primary mt-md" style="width: 100%;"
+            (click)="submitSupportTicket(ticketBody.value); ticketBody.value = ''">Open Ticket</button>
+        </div>
+      </div>
+      <div class="section-card glass">
+        <h3>Recent Tickets</h3>
+        <div class="vulnerabilities-list mt-md">
+          @for (ticket of supportTickets(); track ticket.id) {
+          <div class="vuln-item glass" style="border-left: 4px solid var(--color-primary); padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong>{{ticket.subject}}</strong>
+              <span class="severity-badge" [class]="ticket.status.toLowerCase()">{{ticket.status}}</span>
+            </div>
+            <div class="text-xs text-muted mt-xs">{{ticket.id}} • {{ticket.date}}</div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    <!-- FAQ Section -->
+    <div class="section-card glass mt-xl">
+      <h3>Frequently Asked Questions</h3>
+      <div class="pricing-list mt-md">
+        <div class="price-item"><span>🚀 How do I earn loyalty points?</span><strong>Earn 1 point for every R1 spent on
+            PC sessions.</strong></div>
+        <div class="price-item"><span>🛡️ Is my data safe on the Hub PCs?</span><strong>Yes, all sessions are wiped
+            automatically after logout.</strong></div>
+        <div class="price-item"><span>💳 Can I refund my wallet balance?</span><strong>Refunds are available at the
+            counter for balances over R50.</strong></div>
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- Account & Membership -->
+  @if (currentView() === 'account') {
+  <section class="view active">
+    <div class="view-header">
+      <h2>My Hub Profile</h2>
+    </div>
+    <div class="dual-section">
+      <div class="section-card glass shadow-xl" style="text-align: center; padding: 3rem 2rem;">
+        <img [src]="currentUser().avatar" alt="Avatar"
+          style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--color-primary); margin-bottom: 1.5rem;">
+        <h2 class="text-gradient" style="font-size: 2rem;">{{currentUser().name}}</h2>
+        <span class="severity-badge available" style="font-size: 1rem; padding: 0.5rem 1.5rem;">{{currentUser().tier}}
+          Member</span>
+
+        <div class="metrics-grid mt-xl" style="grid-template-columns: 1fr 1fr;">
+          <div class="metric-card glass">
+            <div class="metric-label">Hub Points</div>
+            <div class="value" style="font-size: 2.5rem; color: var(--color-primary);">{{currentUser().points}}</div>
+          </div>
+          <div class="metric-card glass">
+            <div class="metric-label">Savings This Month</div>
+            <div class="value" style="font-size: 2.5rem; color: var(--color-success);">R150</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Membership Plans -->
+      <div class="section-card glass shadow-xl">
+        <div class="section-header">
+          <h2>Membership Plans</h2>
+        </div>
+        <div class="infra-list mt-md">
+          @for (plan of membershipPlans(); track plan.id) {
+          <div class="infra-item glass" style="flex-direction: column; align-items: flex-start; padding: 1.5rem;"
+            [style.border-top]="'4px solid ' + plan.color">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <h3 [style.color]="plan.color">{{plan.name}}</h3>
+              <strong>R{{plan.price}}/mo</strong>
+            </div>
+            <ul class="text-xs text-muted mt-sm" style="padding-left: 1rem; text-align: left;">
+              @for (benefit of plan.benefits; track benefit) {
+              <li>{{benefit}}</li>
               }
-            </div>
+            </ul>
+            <button class="action-btn secondary small mt-md" (click)="subscribeMembership(plan.name)"
+              style="width: 100%;">Upgrade to {{plan.name}}</button>
           </div>
-        }
+          }
+        </div>
+        <button class="action-btn secondary small mt-xl" (click)="logout()"
+          style="width: 100%; color: var(--color-danger);">Safe Logout 🔒</button>
       </div>
-    </section>
-  }
-
-  <!-- Vulnerabilities View -->
-  @if (currentView() === 'vulnerabilities') {
-    <section class="view active">
-      <div class="view-header"><h2>Vulnerability Assessment</h2></div>
-      <div class="vulnerabilities-list">
-        @for (vuln of vulnerabilities(); track vuln.id) {
-          <div class="vuln-item" [class]="vuln.severity">
-            <div class="vuln-item-header">
-              <h3 class="vuln-title">{{vuln.title}}</h3>
-              <span class="vuln-cve">{{vuln.id}}</span>
-            </div>
-            <p class="vuln-description">{{vuln.description}}</p>
-            <div class="vuln-footer">
-              <span>CVSS: <strong style="color: var(--color-danger)">{{vuln.score}}</strong></span>
-              <span>Systems: {{vuln.systems}}</span>
-            </div>
-          </div>
-        }
-      </div>
-    </section>
-  }
-  <!-- Compliance View -->
-  @if (currentView() === 'compliance') {
-    <section class="view active">
-      <div class="view-header">
-        <h2>Compliance & Reporting</h2>
-        <button class="action-btn primary" (click)="generateReport()">Generate Report</button>
-      </div>
-
-      <div class="compliance-frameworks">
-        @for (framework of complianceFrameworks(); track framework.name) {
-          <div class="framework-card">
-            <div class="framework-header">
-              <h3>{{framework.name}}</h3>
-              <span class="compliance-score">{{framework.score}}%</span>
-            </div>
-            <div class="compliance-bar">
-              <div class="compliance-fill" [style.width.%]="framework.score"></div>
-            </div>
-            <p class="framework-status">{{framework.status}}</p>
-          </div>
-        }
-      </div>
-    </section>
+    </div>
+  </section>
   }
 
 </main>
 
-<!-- Incident Modal -->
-@if (isModalOpen()) {
-  <div class="modal active">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{{selectedIncident()?.type}} - {{selectedIncident()?.id}}</h3>
-        <button class="close-btn" (click)="closeModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Status:</strong> <span class="status-badge investigating">{{selectedIncident()?.status}}</span></p>
-        <p style="margin: 1rem 0;">{{selectedIncident()?.description}}</p>
-        <div style="display: flex; gap: 1rem;">
-          <button class="action-btn primary" (click)="isolateSystem()">Isolate System</button>
-          <button class="action-btn" (click)="escalateIncident()">Escalate</button>
-        </div>
-      </div>
-    </div>
-  </div>
-}
-
-<!-- Notification Panel -->
-<div class="notification-panel" [class.active]="isAlertPanelOpen()">
-  <div class="panel-header">
-    <h3>Security Alerts</h3>
-    <button class="clear-btn" (click)="clearNotifications()">Clear All</button>
-  </div>
-  <div class="notifications-list">
-    @for (note of notifications(); track note.id) {
-      <div class="notification-item" [class]="note.type">
-        <div class="notification-header">
-          <span class="notification-icon">{{note.type === 'critical' ? '🔴' : '🟡'}}</span>
-          <span class="notification-title">{{note.title}}</span>
-        </div>
-        <div class="notification-body">{{note.message}}</div>
-      </div>
-    }
-    @if (notifications().length === 0) {
-      <div class="empty-notifications">No new alerts</div>
-    }
-  </div>
-</div>
-
-<!-- AI Assistant Sidebar -->
+<!-- Helpers -->
 <div class="ai-sidebar" [class.active]="isAIPanelOpen()">
   <div class="ai-header">
-    <div class="ai-title">
-      <span class="ai-bot-icon">🤖</span>
-      <div>
-        <h3>CyberSentinel AI</h3>
-        <span class="ai-status">Ready to assist</span>
-      </div>
+    <div class="ai-title"><span class="ai-bot-icon">🤖</span>
+      <h3>KDT Assistant</h3>
     </div>
     <button class="close-btn" (click)="toggleAI()">✕</button>
   </div>
-  
   <div class="ai-chat-body" #aiChatBody>
     @for (msg of aiMessages(); track $index) {
-      <div class="chat-message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
-        <div class="message-bubble">{{msg.text}}</div>
-      </div>
+    <div class="chat-message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
+      <div class="message-bubble">{{msg.text}}</div>
+    </div>
     }
   </div>
-
   <div class="ai-input-area">
-    <input type="text" #aiInput placeholder="Ask CyberSentinel about threats..." (keyup.enter)="sendAIMessage(aiInput.value); aiInput.value = ''">
-    <button class="send-btn" (click)="sendAIMessage(aiInput.value); aiInput.value = ''">⬆️</button>
-  </div>
-  
-  <div class="ai-suggestions">
-    <button (click)="aiInput.value = 'Analyze current threat level'">Analyze Threats</button>
-    <button (click)="aiInput.value = 'Summarize latest incidents'">Recent Incidents</button>
+    <input type="text" #aiIn placeholder="How can KDT Assistant help you?"
+      (keyup.enter)="sendAIMessage(aiIn.value); aiIn.value = ''">
+
   </div>
 </div>
 
-<!-- Toast Notifications -->
-<div class="toast-container">
-  @for (toast of toasts(); track toast.id) {
-    <div class="toast" [class]="toast.type">
-      <span class="toast-icon">{{toast.icon}}</span>
-      <span class="toast-message">{{toast.message}}</span>
+<div class="notification-panel glass" [class.active]="isAlertPanelOpen()">
+  <div class="panel-header">
+    <h3>Hub Notifications</h3><button class="clear-btn" (click)="clearNotifications()">Dismiss All</button>
+  </div>
+  <div class="notifications-list">
+    @for (note of notifications(); track note.id) {
+    <div class="notification-item" [class]="note.type" style="padding: 1.25rem;">
+      <div style="font-weight: 700; margin-bottom: 0.25rem">{{note.title}}</div>
+      <div class="text-xs text-muted">{{note.message}}</div>
     </div>
+    }
+  </div>
+</div>
+
+<div class="toast-container">
+  @for (t of toasts(); track t.id) {
+  <div class="toast glass" [class]="t.type">
+    <span class="toast-icon">{{t.icon}}</span>
+    <span class="toast-message">{{t.message}}</span>
+  </div>
   }
 </div>
-
-<!-- Profile Edit Modal -->
-@if (isProfileModalOpen()) {
-  <div class="modal active profile">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Edit Administrator Profile</h3>
-        <button class="close-btn" (click)="toggleProfileModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Full Name</label>
-          <input type="text" #nameInput [value]="adminProfile().name" 
-            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
-            placeholder="Enter name...">
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Professional Role</label>
-          <input type="text" #roleInput [value]="adminProfile().role" 
-            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
-            placeholder="e.g. Senior Security Analyst">
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Department</label>
-          <input type="text" #deptInput [value]="adminProfile().department" 
-            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
-            placeholder="e.g. SOC Team Alpha">
-        </div>
-        <div class="modal-bottom-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
-          <button class="action-btn primary" style="flex: 1;" (click)="saveProfile(nameInput.value, roleInput.value, deptInput.value)">Save Changes</button>
-          <button class="action-btn" style="flex: 1;" (click)="toggleProfileModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
 }
