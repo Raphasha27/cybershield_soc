@@ -1,82 +1,81 @@
-# CyberShield Modern - Security Operations Center (SOC) Platform
-🛡️ **State-of-the-Art Cybersecurity Dashboard**
+# CyberShield Modern (Enterprise Migration)
 
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![Platform](https://img.shields.io/badge/platform-Angular-red.svg)]()
-[![AI](https://img.shields.io/badge/AI-CyberSentinel-blue.svg)]()
+This repository now contains a full-stack **React + FastAPI + PostgreSQL** SOC platform with Docker orchestration.
 
-**CyberShield Modern** is a state-of-the-art, high-performance Security Operations Center (SOC) dashboard built with **Angular**. It provides security analysts with a real-time, unified view of their organization's security posture, combining dynamic visualizations, live log streaming, and incident management in a premium, responsive interface.
+## Architecture
 
-## 🕹️ Live Preview
+- `frontend/`: React + Vite + Tailwind SOC dashboard.
+- `backend/`: FastAPI API, AI threat scoring hook, WebSocket log stream.
+- `docker-compose.yml`: launches frontend, backend, and PostgreSQL.
+- Legacy Angular files are still present at repository root for reference while migration completes.
 
-### 🖥️ Unified SOC Dashboard
-View the live dashboard: [CyberShield SOC - Live](https://raphasha27.github.io/cybershield-modern/)
+## Features Included
 
-![Main Dashboard](screenshots/github_dashboard.png)
+- Incident API (`GET/POST /api/v1/incidents`)
+- AI-assisted severity scoring (`POST /api/v1/incidents/score`)
+- Live WebSocket security feed (`ws://localhost:8000/api/v1/logs/stream`)
+- React SOC dashboard with KPI cards, trend chart, and live log panel
+- Dockerized local development stack
 
----
+## Quick Start
 
-## ✨ Key Features & AI Insights
+### 1) Run with Docker (recommended)
 
--   **🤖 CyberSentinel AI Assistant**: A dedicated AI sidekick for real-time threat analysis and rapid security insights.
--   **📈 Real-time Monitoring**: A live "Threat Level" gauge that fluctuates based on incoming heuristic data.
--   **📑 Interactive Metrics**: View critical alerts, active incidents, and vulnerabilities at a glance.
--   **📟 Live Log Stream**: An integrated terminal simulating real-time system logs with color-coded severity.
--   **📋 Incident Kanban**: Manage security incidents through their lifecycle (Detected → Investigating → Containing → Resolved).
--   **🛡️ Glassmorphism Design**: A premium, futuristic dark-mode UI optimized for SOC environments.
+```bash
+docker compose up --build
+```
 
-## 📸 Comprehensive Screenshots
+- Frontend: http://localhost:3000
+- Backend docs: http://localhost:8000/docs
 
-### 🤖 CyberSentinel AI (Chat Interface)
-![AI Assistant](screenshots/github_ai_chat.png)
+### 2) Run services manually
 
-### 🚨 Incident Response (Kanban Board)
-![Incidents](screenshots/github_incidents.png)
+Backend:
 
-### 🛡️ Threat Intelligence Center
-![Threat Intelligence](screenshots/threats.png)
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-## 🚀 Technology Stack
--   **Framework**: [Angular](https://angular.io/) (Latest Version)
--   **State Management**: [Angular Signals](https://angular.io/guide/signals)
--   **Data Visualization**: [Chart.js](https://www.chartjs.org/)
--   **Typography**: Inter & JetBrains Mono
--   **Styling**: Pure CSS3 with CSS Variables for theme management
+Frontend:
 
-## 🛠️ Installation & Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### Prerequisites
--   Node.js (v18.x or higher)
--   npm (v9.x or higher)
--   Angular CLI (`npm install -g @angular/cli`)
+## Environment Variables
 
-### Steps to Run
-1.  **Clone the Repository**:
-    ```bash
-    git clone https://github.com/Raphasha27/cybershield-modern.git
-    cd cybershield-modern
-    ```
-2.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-3.  **Start the Development Server**:
-    ```bash
-    npm start
-    ```
-4.  **Access the Application**: Open your browser and navigate to `http://localhost:4200`
+Backend supports:
 
-## 📊 Live Simulation
-The application includes a built-in simulation engine (`SecurityService`) that generates:
--   Fluctuating threat levels based on random heuristic patterns.
--   A continuous stream of security logs in the integrated terminal.
--   Interactive Chart.js updates upon view switching.
+- `DATABASE_URL` (default points to Docker postgres service)
+- `OPENAI_API_KEY` (optional; if missing, heuristic fallback scoring is used)
+- `JWT_SECRET_KEY`
 
-## 📝 Modernization Details
-This version represents a significant architectural upgrade from the original vanilla JS implementation:
--   **Encapsulation**: Logical components are managed via standalone Angular components.
--   **Reactivity**: Signals ensure the UI stays in perfect sync with the security data without expensive change detection cycles.
--   **Service-Oriented**: All data logic is centralized in a singleton service, allowing for easy integration with real-world APIs in the future.
+## Deployment Guide
 
----
-Developed with ❤️ for the Cybersecurity Community. Visit [Raphasha27 Profile](https://github.com/Raphasha27)
+### Frontend
+
+- Deploy `frontend/` to Vercel or Netlify.
+- Set `VITE_API_BASE_URL` and `VITE_WS_URL` to your backend URL.
+
+### Backend
+
+- Deploy `backend/` to Render, Railway, or ECS.
+- Use managed PostgreSQL and set `DATABASE_URL`.
+- Production command:
+
+```bash
+gunicorn -k uvicorn.workers.UvicornWorker app.main:app
+```
+
+## Next Enterprise Enhancements
+
+- JWT login + RBAC routes
+- Persistent audit log table + retention policies
+- Alert deduplication and SLA timers
+- SIEM connectors (Splunk, Sentinel, Elastic)
