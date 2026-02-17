@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import TypedDict
 
-from openai import OpenAI
+from openai import APIError, OpenAI
 
 from .config import settings
 
@@ -39,22 +39,25 @@ def analyze_threat(description: str) -> ThreatResult:
     if not settings.openai_api_key:
         return _fallback_assessment(description)
 
-    client = OpenAI(api_key=settings.openai_api_key)
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        response_format={"type": "json_object"},
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a SOC analyst. Return JSON with severity, confidence, rationale.",
-            },
-            {"role": "user", "content": f"Assess this incident: {description}"},
-        ],
-    )
-    content = completion.choices[0].message.content or "{}"
-    parsed = json.loads(content)
-    return {
-        "severity": parsed.get("severity", "medium"),
-        "confidence": parsed.get("confidence", "low"),
-        "rationale": parsed.get("rationale", "AI response missing rationale."),
-    }
+    try:
+        client = OpenAI(api_key=settings.openai_api_key)
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a SOC analyst. Return JSON with severity, confidence, rationale.",
+                },
+                {"role": "user", "content": f"Assess this incident: {description}"},
+            ],
+        )
+        content = completion.choices[0].message.content or "{}"
+        parsed = json.loads(content)
+        return {
+            "severity": parsed.get("severity", "medium"),
+            "confidence": parsed.get("confidence", "low"),
+            "rationale": parsed.get("rationale", "AI response missing rationale."),
+        }
+    except (APIError, ValueError, KeyError, TypeError):
+        return _fallback_assessment(description)

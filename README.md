@@ -55,6 +55,7 @@ Backend supports:
 - `DATABASE_URL` (default points to Docker postgres service)
 - `OPENAI_API_KEY` (optional; if missing, heuristic fallback scoring is used)
 - `JWT_SECRET_KEY`
+- `CORS_ORIGINS` (comma-separated list, or `*`)
 
 ## Deployment Guide
 
@@ -79,3 +80,10 @@ gunicorn -k uvicorn.workers.UvicornWorker app.main:app
 - Persistent audit log table + retention policies
 - Alert deduplication and SLA timers
 - SIEM connectors (Splunk, Sentinel, Elastic)
+
+
+## Quality Gates
+
+- GitHub Actions workflow (`.github/workflows/ci.yml`) compiles backend modules on every push/PR.
+- AI scoring automatically falls back to deterministic heuristics when the OpenAI API is unavailable.
+- Frontend dashboard includes API error reporting and WebSocket auto-reconnect behavior for unstable links.
