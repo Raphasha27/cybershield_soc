@@ -1,36 +1,39 @@
-# CyberShield Modern (Enterprise Migration)
+# CyberShield Modern (Demo Launch)
 
-This repository now contains a full-stack **React + FastAPI + PostgreSQL** SOC platform with Docker orchestration.
+This project is currently configured as a **demo app** first.
 
-## Architecture
+Primary goal right now:
+- ship a polished frontend experience on **Vercel** quickly,
+- keep backend optional for local testing,
+- avoid production-hardening scope until later.
 
-- `frontend/`: React + Vite + Tailwind SOC dashboard.
-- `backend/`: FastAPI API, AI threat scoring hook, WebSocket log stream.
-- `docker-compose.yml`: launches frontend, backend, and PostgreSQL.
-- Legacy Angular files are still present at repository root for reference while migration completes.
+## Current App Mode
 
-## Features Included
+- `frontend/`: React + Vite + Tailwind demo SOC dashboard (Vercel-ready)
+- `backend/`: FastAPI prototype API (optional for local development)
+- If backend is not reachable, frontend automatically switches to **demo data mode**.
 
-- Incident API (`GET/POST /api/v1/incidents`)
-- AI-assisted severity scoring (`POST /api/v1/incidents/score`)
-- Live WebSocket security feed (`ws://localhost:8000/api/v1/logs/stream`)
-- React SOC dashboard with KPI cards, trend chart, and live log panel
-- Dockerized local development stack
-
-## Quick Start
-
-### 1) Run with Docker (recommended)
+## Quick Start (Frontend Demo)
 
 ```bash
-docker compose up --build
+cd frontend
+npm install
+npm run dev
 ```
 
-- Frontend: http://localhost:3000
-- Backend docs: http://localhost:8000/docs
+Open: `http://localhost:3000`
 
-### 2) Run services manually
+## Vercel Deployment (Frontend Only)
 
-Backend:
+Deploy `frontend/` as the project root in Vercel.
+
+Recommended env vars for demo deployment:
+- `VITE_API_BASE_URL` (optional)
+- `VITE_WS_URL` (optional)
+
+If these are not set or the backend is down, demo data is displayed.
+
+## Optional Local Backend
 
 ```bash
 cd backend
@@ -40,50 +43,9 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Frontend:
+API docs: `http://localhost:8000/docs`
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## Notes
 
-## Environment Variables
-
-Backend supports:
-
-- `DATABASE_URL` (default points to Docker postgres service)
-- `OPENAI_API_KEY` (optional; if missing, heuristic fallback scoring is used)
-- `JWT_SECRET_KEY`
-- `CORS_ORIGINS` (comma-separated list, or `*`)
-
-## Deployment Guide
-
-### Frontend
-
-- Deploy `frontend/` to Vercel or Netlify.
-- Set `VITE_API_BASE_URL` and `VITE_WS_URL` to your backend URL.
-
-### Backend
-
-- Deploy `backend/` to Render, Railway, or ECS.
-- Use managed PostgreSQL and set `DATABASE_URL`.
-- Production command:
-
-```bash
-gunicorn -k uvicorn.workers.UvicornWorker app.main:app
-```
-
-## Next Enterprise Enhancements
-
-- JWT login + RBAC routes
-- Persistent audit log table + retention policies
-- Alert deduplication and SLA timers
-- SIEM connectors (Splunk, Sentinel, Elastic)
-
-
-## Quality Gates
-
-- GitHub Actions workflow (`.github/workflows/ci.yml`) compiles backend modules on every push/PR.
-- AI scoring automatically falls back to deterministic heuristics when the OpenAI API is unavailable.
-- Frontend dashboard includes API error reporting and WebSocket auto-reconnect behavior for unstable links.
+- This is intentionally **not** a production deployment profile.
+- Production concerns (hard security, scaling, observability, infra) are deferred to a later phase.

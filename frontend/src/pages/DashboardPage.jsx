@@ -11,12 +11,41 @@ import api from '../services/api'
 
 const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/api/v1/logs/stream'
 
+const demoIncidents = [
+  {
+    id: 1,
+    title: 'Suspicious PowerShell command sequence',
+    description: 'Encoded command execution observed on FIN-WS-12',
+    severity: 'high',
+  },
+  {
+    id: 2,
+    title: 'Multiple failed privileged logins',
+    description: 'Admin account lockout threshold nearly reached',
+    severity: 'medium',
+  },
+  {
+    id: 3,
+    title: 'Potential data exfiltration pattern',
+    description: 'Large outbound transfer spike to unknown ASN',
+    severity: 'critical',
+  },
+]
+
+const demoLogMessages = [
+  'Demo mode: endpoint agent heartbeat received',
+  'Demo mode: firewall denied inbound request from 203.0.113.55',
+  'Demo mode: malware signature update completed',
+  'Demo mode: unusual authentication sequence detected',
+]
+
 export default function DashboardPage() {
   const [incidents, setIncidents] = useState([])
   const [logs, setLogs] = useState([])
   const [loadingIncidents, setLoadingIncidents] = useState(true)
   const [incidentError, setIncidentError] = useState('')
   const [socketState, setSocketState] = useState('connecting')
+  const [isDemoMode, setIsDemoMode] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -32,8 +61,9 @@ export default function DashboardPage() {
       })
       .catch(() => {
         if (active) {
-          setIncidentError('Could not load incidents. Verify backend connectivity.')
-          setIncidents([])
+          setIsDemoMode(true)
+          setIncidentError('Backend not available. Showing demo data.')
+          setIncidents(demoIncidents)
         }
       })
       .finally(() => {
@@ -50,21 +80,38 @@ export default function DashboardPage() {
   useEffect(() => {
     let socket
     let reconnectTimer
+    let demoTimer
     let closedByComponent = false
 
+    const startDemoLogs = () => {
+      setSocketState('demo')
+      demoTimer = setInterval(() => {
+        const message = demoLogMessages[Math.floor(Math.random() * demoLogMessages.length)]
+        setLogs((prev) => [
+          { timestamp: new Date().toISOString(), message },
+          ...prev,
+        ].slice(0, 8))
+      }, 2000)
+    }
+
     const connect = () => {
-      setSocketState('connecting')
       socket = new WebSocket(wsUrl)
+      setSocketState('connecting')
 
       socket.onopen = () => setSocketState('connected')
       socket.onmessage = (evt) => {
         const data = JSON.parse(evt.data)
         setLogs((prev) => [data, ...prev].slice(0, 8))
       }
-      socket.onerror = () => setSocketState('error')
+      socket.onerror = () => {
+        setIsDemoMode(true)
+        setSocketState('demo')
+        if (!demoTimer) {
+          startDemoLogs()
+        }
+      }
       socket.onclose = () => {
-        if (!closedByComponent) {
-          setSocketState('reconnecting')
+        if (!closedByComponent && !demoTimer) {
           reconnectTimer = setTimeout(connect, 1500)
         }
       }
@@ -76,6 +123,9 @@ export default function DashboardPage() {
       closedByComponent = true
       if (reconnectTimer) {
         clearTimeout(reconnectTimer)
+      }
+      if (demoTimer) {
+        clearInterval(demoTimer)
       }
       if (socket) {
         socket.close()
@@ -99,7 +149,8 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-cyberBg p-6 text-slate-100">
       <h1 className="mb-2 text-3xl font-bold text-neon">CyberShield Enterprise SOC</h1>
-      <p className="mb-6 text-sm text-slate-400">Live socket status: {socketState}</p>
+      <p className="mb-1 text-sm text-slate-400">Live socket status: {socketState}</p>
+      {isDemoMode ? <p className="mb-6 text-xs text-amber-300">Demo mode enabled for frontend-only deployment.</p> : <div className="mb-6" />}
 
       <section className="grid gap-4 md:grid-cols-3">
         <MetricCard label="Active Incidents" value={incidents.length} />
