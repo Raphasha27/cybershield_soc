@@ -60,6 +60,17 @@
   <!-- Dashboard View -->
   @if (currentView() === 'dashboard') {
     <section class="view active">
+      <div class="reference-strip">
+        <div>
+          <p class="reference-label">Design reference</p>
+          <h3>Akhil-inspired SOC command view</h3>
+        </div>
+        <div class="reference-actions">
+          <button class="action-btn primary small" (click)="setView('incidents')">Review incidents</button>
+          <button class="action-btn secondary small" (click)="setView('threats')">Track threats</button>
+        </div>
+      </div>
+
       <div class="threat-banner">
         <div class="threat-banner-content">
           <div class="threat-level">

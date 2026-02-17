@@ -36,6 +36,18 @@ View the live dashboard: [CyberShield SOC - Live](https://raphasha27.github.io/c
 ### 🛡️ Threat Intelligence Center
 ![Threat Intelligence](screenshots/threats.png)
 
+## 🎨 UI Enhancement Notes
+- Added an **Akhil-inspired command strip** in the dashboard for faster access to incidents and threats.
+- Refined call-to-action styling with primary and secondary action buttons for clearer analyst workflows.
+
+## 🌿 Applying README updates on all branches
+This repository update is committed on the current branch. To apply the same README/UI updates on other branches, cherry-pick the commit after merge:
+
+```bash
+git checkout <other-branch>
+git cherry-pick <this-commit-sha>
+```
+
 ## 🚀 Technology Stack
 -   **Framework**: [Angular](https://angular.io/) (Latest Version)
 -   **State Management**: [Angular Signals](https://angular.io/guide/signals)

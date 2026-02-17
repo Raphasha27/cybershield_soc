@@ -730,3 +730,42 @@
     font-size: 0.875rem;
     color: var(--color-text-secondary);
 }
+
+.reference-strip {
+    background: linear-gradient(120deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+}
+
+.reference-label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.reference-strip h3 {
+    font-size: 1.05rem;
+}
+
+.reference-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.action-btn.secondary {
+    background: transparent;
+    color: var(--color-primary);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.action-btn.secondary:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
