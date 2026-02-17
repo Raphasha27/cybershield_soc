@@ -1,82 +1,41 @@
-# CyberShield Modern - Security Operations Center (SOC) Platform
-🛡️ **State-of-the-Art Cybersecurity Dashboard**
+# Kivoc Denamic Technology - Premium Internet Cafe Hub
+📍 **Atteridgeville**
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![Platform](https://img.shields.io/badge/platform-Angular-red.svg)]()
-[![AI](https://img.shields.io/badge/AI-CyberSentinel-blue.svg)]()
 
-**CyberShield Modern** is a state-of-the-art, high-performance Security Operations Center (SOC) dashboard built with **Angular**. It provides security analysts with a real-time, unified view of their organization's security posture, combining dynamic visualizations, live log streaming, and incident management in a premium, responsive interface.
+**Kivoc Denamic Technology** is a state-of-the-art Internet Cafe management and tech hub platform built with **Angular**. Located at the heart of Atteridgeville, it provides a unified command center for station occupancy, live user sessions, bookings, and business performance in a premium, responsive interface.
 
 ## 🕹️ Live Preview
+### 🖥️ Cafe Operations Dashboard
+View the live dashboard: **Kivoc Denamic - Live (Updated)**
 
-### 🖥️ Unified SOC Dashboard
-View the live dashboard: [CyberShield SOC - Live](https://raphasha27.github.io/cybershield-modern/)
-
-![Main Dashboard](screenshots/github_dashboard.png)
-
----
-
-## ✨ Key Features & AI Insights
-
--   **🤖 CyberSentinel AI Assistant**: A dedicated AI sidekick for real-time threat analysis and rapid security insights.
--   **📈 Real-time Monitoring**: A live "Threat Level" gauge that fluctuates based on incoming heuristic data.
--   **📑 Interactive Metrics**: View critical alerts, active incidents, and vulnerabilities at a glance.
--   **📟 Live Log Stream**: An integrated terminal simulating real-time system logs with color-coded severity.
--   **📋 Incident Kanban**: Manage security incidents through their lifecycle (Detected → Investigating → Containing → Resolved).
--   **🛡️ Glassmorphism Design**: A premium, futuristic dark-mode UI optimized for SOC environments.
-
-## 📸 Comprehensive Screenshots
-
-### 🤖 CyberSentinel AI (Chat Interface)
-![AI Assistant](screenshots/github_ai_chat.png)
-
-### 🚨 Incident Response (Kanban Board)
-![Incidents](screenshots/github_incidents.png)
-
-### 🛡️ Threat Intelligence Center
-![Threat Intelligence](screenshots/threats.png)
+## ✨ Key Features & Operations
+- 🤖 **Kivoc AI Assistant**: AI helper for occupancy optimization and rapid business insights.
+- 📈 **Real-time Load Tracking**: Live "Cafe Load" gauge for station occupancy.
+- 📑 **Station Management**: Visibility into PC, Mac, and Console stations.
+- 📟 **Live Operations Log**: Streaming floor events (log-ins, payments, maintenance alerts).
+- 📋 **Session Kanbanboard**: Manage sessions (Pending → Active → Ending → Completed).
+- 💰 **Performance Metrics**: Daily revenue targets, peak occupancy, and uptime.
 
 ## 🚀 Technology Stack
--   **Framework**: [Angular](https://angular.io/) (Latest Version)
--   **State Management**: [Angular Signals](https://angular.io/guide/signals)
--   **Data Visualization**: [Chart.js](https://www.chartjs.org/)
--   **Typography**: Inter & JetBrains Mono
--   **Styling**: Pure CSS3 with CSS Variables for theme management
+- **Framework**: Angular (Latest Version)
+- **State Management**: Angular Signals
+- **Data Visualization**: Chart.js
+- **Styling**: Pure CSS3 with Glassmorphism aesthetic
 
 ## 🛠️ Installation & Setup
-
 ### Prerequisites
--   Node.js (v18.x or higher)
--   npm (v9.x or higher)
--   Angular CLI (`npm install -g @angular/cli`)
+- Node.js (v18.x or higher)
+- npm (v9.x or higher)
 
 ### Steps to Run
-1.  **Clone the Repository**:
-    ```bash
-    git clone https://github.com/Raphasha27/cybershield-modern.git
-    cd cybershield-modern
-    ```
-2.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-3.  **Start the Development Server**:
-    ```bash
-    npm start
-    ```
-4.  **Access the Application**: Open your browser and navigate to `http://localhost:4200`
+```bash
+git clone https://github.com/Raphasha27/cybershield-modern.git
+cd cybershield-modern
+npm install
+npm start
+```
 
-## 📊 Live Simulation
-The application includes a built-in simulation engine (`SecurityService`) that generates:
--   Fluctuating threat levels based on random heuristic patterns.
--   A continuous stream of security logs in the integrated terminal.
--   Interactive Chart.js updates upon view switching.
+Open: `http://localhost:4200`
 
-## 📝 Modernization Details
-This version represents a significant architectural upgrade from the original vanilla JS implementation:
--   **Encapsulation**: Logical components are managed via standalone Angular components.
--   **Reactivity**: Signals ensure the UI stays in perfect sync with the security data without expensive change detection cycles.
--   **Service-Oriented**: All data logic is centralized in a singleton service, allowing for easy integration with real-world APIs in the future.
-
----
-Developed with ❤️ for the Cybersecurity Community. Visit [Raphasha27 Profile](https://github.com/Raphasha27)
+Developed for the Atteridgeville Tech Community. Visit [Raphasha27 Profile](https://github.com/Raphasha27)
