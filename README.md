@@ -66,6 +66,22 @@ View the live dashboard: [CyberShield SOC - Live](https://raphasha27.github.io/c
     ```
 4.  **Access the Application**: Open your browser and navigate to `http://localhost:4200`
 
+## 🌌 One-Branch Fusion Workflow (Keep All History)
+
+If you want a single branch timeline (for example `main`) while preserving every commit from your other branches, run:
+
+```bash
+bash scripts/one-branch-fusion.sh main origin
+```
+
+What this does:
+- Checks out (or creates) `main`.
+- Merges every other local branch with `--no-ff` so history remains visible.
+- Prints a clean graph view so you can *see* unified history immediately.
+- Shows optional cleanup and push commands.
+
+Use this to keep one branch on GitHub without losing the story of your work.
+
 ## 📊 Live Simulation
 The application includes a built-in simulation engine (`SecurityService`) that generates:
 -   Fluctuating threat levels based on random heuristic patterns.
