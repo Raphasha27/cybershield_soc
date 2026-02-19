@@ -1,0 +1,6 @@
+{
+  "framework": "angular",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/cybershield-soc/browser",
+  "installCommand": "npm ci"
+}
