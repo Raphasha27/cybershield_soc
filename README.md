@@ -1,3 +1,5 @@
 # CyberShield Modern
 
-This repository has been reset and is currently under development while we define a more strategic approach.
+> 🚧 Under Development
+
+The repository has been intentionally cleared while we define a more strategic approach.
