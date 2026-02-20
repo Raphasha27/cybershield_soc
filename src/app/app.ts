@@ -29,6 +29,14 @@ export class App implements AfterViewInit, OnDestroy {
   darknetFeed = this.securityService.darknetFeed;
   attackSources = this.securityService.attackSources;
 
+  // ML & Checkup Service Signals
+  mlStatus = this.securityService.mlStatus;
+  checkupResults = this.securityService.checkupResults;
+  isSystemScanning = this.securityService.isSystemScanning;
+  enterpriseDevices = this.securityService.enterpriseDevices;
+  commShieldAlerts = this.securityService.commShieldAlerts;
+  fleetStatus = this.securityService.fleetStatus;
+
   // UI State
   // Auth State
   isLoggedIn = signal(false);
@@ -45,6 +53,13 @@ export class App implements AfterViewInit, OnDestroy {
   chartTimeRange = signal<'24H' | '7D' | '30D'>('24H');
   searchQuery = signal('');
   isSearchFocused = signal(false);
+
+  // Checkup Form State
+  checkupForm = signal({
+    email: '',
+    idNumber: '',
+    phone: ''
+  });
 
   adminProfile = signal({
     name: 'SOC Admin',
@@ -78,8 +93,10 @@ export class App implements AfterViewInit, OnDestroy {
     { id: 'threats', label: 'Threats', icon: '⚡' },
     { id: 'incidents', label: 'Incidents', icon: '🔥' },
     { id: 'vulnerabilities', label: 'Vulnerabilities', icon: '🔓' },
-    { id: 'darknet', label: 'Darknet', icon: '👁' },
+    { id: 'enterprise', label: 'Enterprise Hub', icon: '🏢' },
+    { id: 'comm-shield', label: 'Neural Shield', icon: '🛡' },
     { id: 'compliance', label: 'Compliance', icon: '✓' },
+    { id: 'checkup', label: 'System Checkup', icon: '🔍' },
   ];
 
   constructor() {
@@ -121,7 +138,7 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   getStarted() {
-    this.currentView.set('login');
+    this.currentView.set('get-started');
   }
 
   login(email: string, pass: string) {
@@ -140,7 +157,21 @@ export class App implements AfterViewInit, OnDestroy {
       this.currentView.set('dashboard');
       this.showToast('Authentication successful — Welcome, ' + this.adminProfile().name, 'success', '✓');
       this.animateCounters(); // Re-animate counters for the logged-in user
+      this.initDeviceSimulations();
     }, 1500);
+  }
+
+  initDeviceSimulations() {
+    const id = setInterval(() => {
+      // Simulate location drift for fleet
+      this.enterpriseDevices().forEach(dev => {
+        if (dev.location) {
+          dev.location.lat += (Math.random() - 0.5) * 0.001;
+          dev.location.lng += (Math.random() - 0.5) * 0.001;
+        }
+      });
+    }, 5000);
+    this.intervals.push(id);
   }
 
   logout() {
@@ -247,6 +278,27 @@ export class App implements AfterViewInit, OnDestroy {
     this.adminProfile.set({ name, role, department: dept });
     this.showToast('Profile updated successfully', 'success', '👤');
     this.isProfileModalOpen.set(false);
+  }
+
+  // === SYSTEM CHECKUP & ML ===
+  updateCheckupForm(field: string, event: Event) {
+    const val = (event.target as HTMLInputElement).value;
+    this.checkupForm.update(f => ({ ...f, [field]: val }));
+  }
+
+  runPersonalCheckup() {
+    const data = this.checkupForm();
+    if (!data.email && !data.idNumber && !data.phone) {
+      this.showToast('Please provide at least one identifier for the ML scan', 'error', '⚠️');
+      return;
+    }
+    this.showToast('Initiating ML-driven identity integrity scan...', 'info', '🧠');
+    this.securityService.performSystemCheckup(data);
+  }
+
+  trainModel() {
+    this.showToast('Neural network training initialized with new entropy data...', 'info', '⚙️');
+    this.securityService.trainMLModel();
   }
 
   // === NOTIFICATIONS ===

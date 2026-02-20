@@ -1,116 +1,277 @@
 @if (currentView() === 'landing') {
+<nav class="premium-nav">
+  <div class="logo">
+    <div class="logo-icon">🛡</div>CYBERSHIELD
+  </div>
+  <ul class="nav-links">
+    <li><button (click)="setView('landing')">Protection</button></li>
+    <li><button (click)="setView('checkup')">Checkup</button></li>
+    <li><button (click)="setView('login')">Operator Portal</button></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-dot"></div>ALL SHIELDS ACTIVE
+  </div>
+</nav>
+
 <section class="landing-page">
-  <div class="landing-hero">
-    <div class="hero-bg-glow"></div>
-    <div class="hero-content">
-      <div class="hero-logo">
-        <span class="logo-icon">⬡</span>
-        <span class="logo-text">CyberShield</span>
+  <div class="hero-section">
+    <div class="hero-left">
+      <div class="badge">
+        <div class="status-dot"></div>TOTAL PROTECTION ACTIVE — 6 SHIELDS ENABLED
       </div>
-      <h1 class="hero-title">Cloud-Native Security <br><span class="highlight">Intelligence Platform</span></h1>
-      <p class="hero-subtitle">Next-generation SOC operations powered by AI. Real-time threat detection, automated
-        response, and darknet intelligence unified in one premium dashboard.</p>
-      <div class="hero-actions">
-        <button class="action-btn primary large" (click)="getStarted()">Get Started — Deploy SOC</button>
-        <button class="action-btn large" (click)="setView('login')">Operator Login</button>
+      <h1>
+        <div class="solid">TOTAL</div>
+        <div class="outline">CYBER</div>
+        <div class="solid">DEFENSE</div>
+      </h1>
+      <p class="hero-desc">CyberShield wraps your digital life in six layers of protection — blocking malware,
+        ransomware, phishing, harmful ads, trackers, and zero-day exploits before they ever reach you. Powered by Neural
+        Engine v3.0.</p>
+
+      <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-icon">🦠</div>
+          <div class="pillar-title">Malware Defense</div>
+          <div class="pillar-desc">Signatures + heuristic AI stops viruses & trojans instantly.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🚫</div>
+          <div class="pillar-title">Ad & Tracker Block</div>
+          <div class="pillar-desc">Eliminates harmful ads & pop-ups.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🔒</div>
+          <div class="pillar-title">Ransomware Shield</div>
+          <div class="pillar-desc">Stops file encryption attacks dead.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🎣</div>
+          <div class="pillar-title">Anti-Phishing</div>
+          <div class="pillar-desc">Detects fake login pages & scam emails.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🌐</div>
+          <div class="pillar-title">WAF Protection</div>
+          <div class="pillar-desc">Stops SQLi & XSS in under 1ms.</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🕵️</div>
+          <div class="pillar-title">Dark Web Monitor</div>
+          <div class="pillar-desc">Alerts you the moment your data surfaces.</div>
+        </div>
       </div>
-      <div class="hero-stats">
-        <div class="landing-stat">
-          <span class="stat-num">99.9%</span>
-          <span class="stat-desc">Threat Neutralization</span>
+
+      <div class="stats-bar">
+        <div><span class="stat-num">4.2M+</span><span class="stat-label">Threats Blocked Today</span></div>
+        <div><span class="stat-num">99.97%</span><span class="stat-label">Detection Rate</span></div>
+        <div><span class="stat-num">&lt;12ms</span><span class="stat-label">Response Time</span></div>
+        <div class="ml-status-inline">
+          <span class="stat-num">🧠 {{ mlStatus().confidence }}%</span>
+          <span class="stat-label">AI Confidence</span>
         </div>
-        <div class="landing-stat">
-          <span class="stat-num">24/7</span>
-          <span class="stat-desc">Active Monitoring</span>
-        </div>
-        <div class="landing-stat">
-          <span class="stat-num">AI-Driven</span>
-          <span class="stat-desc">Pattern Recognition</span>
+      </div>
+
+      <div class="ticker-bar">
+        <span class="ticker-label">LIVE THREATS</span>
+        <div class="ticker-wrap">
+          <div class="ticker-scroll">
+            <span class="ticker-item">Ransomware payload blocked — <span>User: JSmith</span></span>
+            <span class="ticker-item">Phishing domain flagged — <span>secure-paypa1.com</span></span>
+            <span class="ticker-item">Malvertising ad killed — <span>Casino popup network</span></span>
+            <span class="ticker-item">SQL Injection stopped — <span>POST /api/login</span></span>
+            <span class="ticker-item">Cryptominer terminated — <span>PID 3840</span></span>
+            <span class="ticker-item">DDoS flood mitigated — <span>22,000 req/s</span></span>
+            <!-- Duplicated for seamless loop -->
+            <span class="ticker-item">Ransomware payload blocked — <span>User: JSmith</span></span>
+            <span class="ticker-item">Phishing domain flagged — <span>secure-paypa1.com</span></span>
+          </div>
         </div>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="visual-mock">
-        <div class="mock-header">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+
+    <!-- AUTH PANEL (Integrated Signup/Login for Landing) -->
+    <div class="auth-panel">
+      <div class="corner c-tl"></div>
+      <div class="corner c-tr"></div>
+      <div class="corner c-bl"></div>
+      <div class="corner c-br"></div>
+      <div class="panel-inner">
+        <div class="tab-nav">
+          <button class="tab-btn active" (click)="setView('login')">LOGIN</button>
+          <button class="tab-btn" (click)="getStarted()">GET STARTED</button>
         </div>
-        <div class="mock-body">
-          <div class="mock-line" style="width: 80%"></div>
-          <div class="mock-line" style="width: 60%"></div>
-          <div class="mock-line" style="width: 90%; height: 60px; background: rgba(0,212,255,0.1)"></div>
-          <div class="mock-grid">
-            <span></span><span></span><span></span><span></span>
+
+        <div class="panel-content">
+          <div class="panel-title">SECURE OPERATOR ACCESS</div>
+          <p class="panel-sub">Authorize to enter the CyberShield SOC Terminal.</p>
+
+          <button class="btn-primary" (click)="setView('login')">LOG IN TO DASHBOARD</button>
+
+          <div class="divider">
+            <div class="div-line"></div><span class="div-text">OR</span>
+            <div class="div-line"></div>
+          </div>
+
+          <button class="btn-outline" (click)="getStarted()">CREATE PARTNER ACCOUNT</button>
+
+          <div class="sec-badges">
+            <div class="sec-badge">AES-256</div>
+            <div class="sec-badge">SOC-2</div>
+            <div class="sec-badge">ISO 27001</div>
+            <div class="sec-badge">GDPR</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- NEW FEATURES SECTION -->
-  <div class="landing-features">
-    <div class="features-header">
-      <span class="badge-tag">CORE CAPABILITIES</span>
-      <h2>Unified Defense for the <span class="highlight">Modern Enterprise</span></h2>
-      <p>CyberShield provides comprehensive cybersecurity solutions designed to protect businesses from sophisticated
-        threats.</p>
+  <!-- PROTECTION MODULES SECTION (REPLACING OLD FEATURES) -->
+  <div class="section-wrap section-divider" id="protection">
+    <div class="section-sub">Active Defense Engine</div>
+    <div class="section-title">SECURITY ARCHITECTURE</div>
+    <div class="modules-grid">
+      <div class="module-card" style="--mc:#00ff88;">
+        <div class="module-header">
+          <div class="module-icon">🦠</div><button class="module-toggle"
+            onclick="this.classList.toggle('off')"></button>
+        </div>
+        <div class="module-name">Layer 1</div>
+        <div class="module-title">MALWARE PROTECTION</div>
+        <div class="module-desc">Signature scanning + behavioral AI catches viruses & trojans before execution.</div>
+        <div class="module-stat">
+          <div>
+            <div class="m-stat-val" style="color:#00ff88;">847K</div>
+            <div class="m-stat-lbl">Blocked</div>
+          </div>
+          <div>
+            <div class="m-stat-val" style="color:var(--accent2);font-size:15px;">ACTIVE</div>
+            <div class="m-stat-lbl">Status</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card" style="--mc:#ff3c3c;">
+        <div class="module-header">
+          <div class="module-icon">🔒</div><button class="module-toggle"
+            onclick="this.classList.toggle('off')"></button>
+        </div>
+        <div class="module-name">Layer 2</div>
+        <div class="module-title">RANSOMWARE SHIELD</div>
+        <div class="module-desc">Stops mass encryption dead and restores from shadow backups automatically.</div>
+        <div class="module-stat">
+          <div>
+            <div class="m-stat-val" style="color:#ff3c3c;">12,400</div>
+            <div class="m-stat-lbl">Stopped</div>
+          </div>
+          <div>
+            <div class="m-stat-val" style="color:var(--accent2);font-size:15px;">ACTIVE</div>
+            <div class="m-stat-lbl">Status</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card" style="--mc:#00d4ff;">
+        <div class="module-header">
+          <div class="module-icon">🔥</div><button class="module-toggle"
+            onclick="this.classList.toggle('off')"></button>
+        </div>
+        <div class="module-name">Layer 3</div>
+        <div class="module-title">NEXT-GEN WAF</div>
+        <div class="module-desc">Blocks SQL injections, XSS, and path traversal in under 1ms.</div>
+        <div class="module-stat">
+          <div>
+            <div class="m-stat-val" style="color:#00d4ff;">2.1M</div>
+            <div class="m-stat-lbl">Filtered</div>
+          </div>
+          <div>
+            <div class="m-stat-val" style="color:var(--accent2);font-size:15px;">ACTIVE</div>
+            <div class="m-stat-lbl">Status</div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="features-grid">
-      <div class="feature-item">
-        <div class="feature-icon">🛡️</div>
-        <h3>Real-Time Threat Detection</h3>
-        <p>Comprehensive protection including behavioral monitoring and real-time response for businesses of all sizes.
-        </p>
+  <footer class="landing-footer">
+    <div class="footer-logo">🛡 CYBERSHIELD SOC</div>
+    <div class="footer-text">Built by Kivoc Dynamic Technology | v4.2.1 — Neural Matrix</div>
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--accent2); margin-top:5px;">● TEST ENVIRONMENT
+      ONLY — RESEARCH PURPOSES</div>
+  </footer>
+</section>
+}
+
+@if (currentView() === 'login') {
+<section class="login-page">
+  <div class="auth-panel">
+    <div class="corner c-tl"></div>
+    <div class="corner c-tr"></div>
+    <div class="corner c-bl"></div>
+    <div class="corner c-br"></div>
+    <div class="panel-inner">
+      <div class="panel-title">SECURE ACCESS</div>
+      <p class="panel-sub">Sign in to your protection dashboard.</p>
+
+      <div class="form-group">
+        <label>Operator ID / Email</label>
+        <input type="email" #emailInput value="admin@cybershield.so" placeholder="admin@cybershield.so">
       </div>
-      <div class="feature-item">
-        <div class="feature-icon">🌐</div>
-        <h3>Next-Gen WAF</h3>
-        <p>Advanced Web Application Firewall protecting websites and CMS from SQL injections and cross-site scripting
-          (XSS).</p>
+      <div class="form-group">
+        <label>Security Protocol / Password</label>
+        <input type="password" #passInput value="••••••••" placeholder="Enter password">
       </div>
-      <div class="feature-item">
-        <div class="feature-icon">👁️</div>
-        <h3>Active Pulse Monitor</h3>
-        <p>Suspicious visitor monitoring, automated IP management, and detailed forensic threat logging.</p>
+
+      <button class="btn-primary" [disabled]="isLoginLoading()" (click)="login(emailInput.value, passInput.value)">
+        @if (isLoginLoading()) {
+        <span class="loader"></span> AUTHENTICATING...
+        } @else {
+        AUTHENTICATE & ACCESS SOC
+        }
+      </button>
+
+      <div class="sec-badges">
+        <div class="sec-badge">RSA-4096</div>
+        <div class="sec-badge">TLS 1.3</div>
+        <div class="sec-badge">MFA REQUIRED</div>
       </div>
-      <div class="feature-item">
-        <div class="feature-icon">⚖️</div>
-        <h3>Compliance & Safeguard</h3>
-        <p>Ensure data integrity and meet global compliance requirements while defending against zero-day attacks.</p>
+
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn-outline small" (click)="setView('landing')">RETURN TO PERIMETER</button>
       </div>
     </div>
   </div>
 </section>
 }
 
-@if (currentView() === 'login') {
-<section class="login-page">
-  <div class="login-card">
-    <div class="login-header">
-      <div class="logo-icon">⬡</div>
-      <h2>Operator Authentication</h2>
-      <p>Access the localized CyberShield SOC network</p>
-    </div>
-    <div class="login-form">
+@if (currentView() === 'get-started') {
+<section class="login-page animate-fade">
+  <div class="auth-panel">
+    <div class="corner c-tl"></div>
+    <div class="corner c-tr"></div>
+    <div class="corner c-bl"></div>
+    <div class="corner c-br"></div>
+    <div class="panel-inner">
+      <div class="panel-title">SYSTEM PROVISIONING</div>
+      <p class="panel-sub">Initialize your 'Total Cyber Defense' node.</p>
+
       <div class="form-group">
-        <label for="email">Operator ID / Email</label>
-        <input type="email" id="email" #emailInput value="admin@cybershield.so" placeholder="admin@cybershield.so">
+        <label>Organization Name</label>
+        <input type="text" placeholder="e.g. Kivoc Dynamic Tech">
       </div>
       <div class="form-group">
-        <label for="password">Security Protocol / Password</label>
-        <input type="password" id="password" #passInput value="••••••••" placeholder="Enter password">
+        <label>Primary Operator Email</label>
+        <input type="email" placeholder="admin@kivoc.tech">
       </div>
-      <button class="action-btn primary full-width" [disabled]="isLoginLoading()"
-        (click)="login(emailInput.value, passInput.value)">
-        @if (isLoginLoading()) {
-        <span class="loader"></span> Authenticating...
-        } @else {
-        Authorize & Access Terminal
-        }
+      <div class="form-group">
+        <label>Neural Shield Pin</label>
+        <input type="password" placeholder="6-digit security pin">
+      </div>
+
+      <button class="btn-primary" (click)="setView('login')">
+        INITIALIZE & ACTIVATE PROTECTIONS
       </button>
-    </div>
-    <div class="login-footer">
-      <p>Encrypted Session • RSA-4096 Certified</p>
+
+      <div style="text-align:center; margin-top:20px;">
+        <button class="btn-outline small" (click)="setView('landing')">RETURN TO PERIMETER</button>
+      </div>
     </div>
   </div>
 </section>
@@ -287,14 +448,29 @@
           <h3>Threat Activity Timeline</h3>
           <div class="chart-controls">
             @for (r of ['24H', '7D', '30D']; track r) {
-            <button class="chart-btn" [class.active]="chartTimeRange() === r" (click)="setChartRange(r)">{{ r
-              }}</button>
+            <button class="btn-outline small" [class.active]="chartTimeRange() === r" (click)="setChartRange(r)"
+              style="width:auto; padding:4px 10px;">{{ r }}</button>
             }
           </div>
         </div>
         <div class="chart-container">
           <canvas id="threatTimelineChart"></canvas>
         </div>
+      </div>
+
+      <!-- SYSTEM CHECKUP PROMO CARD -->
+      <div class="card promo-card"
+        style="padding:24px; display:flex; flex-direction:column; justify-content:center; gap:20px; border-color:var(--accent);">
+        <div class="promo-content" style="display:flex; gap:15px; align-items:center;">
+          <span class="p-icon" style="font-size:32px;">🔍</span>
+          <div class="p-text">
+            <h4
+              style="font-family:var(--font-display); font-size:1.4rem; color:white; letter-spacing:1px; margin-bottom:4px;">
+              NEURAL INTEGRITY</h4>
+            <p style="font-size:12px; color:var(--muted);">Deep web breach detection.</p>
+          </div>
+        </div>
+        <button class="btn-primary small full-width" (click)="setView('checkup')">RUN SCAN</button>
       </div>
 
       <!-- Threat Distribution Donut -->
@@ -366,19 +542,26 @@
 
       <!-- Attack Sources -->
       <div class="section-card">
-        <div class="card-header">
-          <h3>Top Attack Sources</h3>
-          <span class="live-indicator"><span class="live-dot"></span>LIVE</span>
+        <div class="card-header"
+          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h3 style="font-family:var(--font-display); font-size:1.4rem; color:white; letter-spacing:1px;">TOP ATTACK
+            SOURCES</h3>
+          <div class="nav-status">
+            <div class="status-dot"></div> LIVE
+          </div>
         </div>
         <div class="attack-sources">
           @for (src of attackSources(); track src.country) {
-          <div class="source-item">
+          <div class="source-item" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
             <span class="country-flag">{{ src.flag }}</span>
-            <span class="country-name">{{ src.country }}</span>
-            <div class="source-bar">
-              <div class="bar-fill" [style.width.%]="src.percent"></div>
+            <span class="country-name"
+              style="flex:1; font-family:var(--font-mono); font-size:11px; color:var(--muted);">{{
+              src.country.toUpperCase() }}</span>
+            <div class="progress-bar-bg" style="width:100px; height:4px; flex-shrink:0;">
+              <div class="progress-bar-fill" [style.width.%]="src.percent"></div>
             </div>
-            <span class="source-count">{{ src.count.toLocaleString() }}</span>
+            <span class="source-count" style="font-family:var(--font-mono); font-size:10px; color:var(--accent);">{{
+              src.count.toLocaleString() }}</span>
           </div>
           }
         </div>
@@ -386,14 +569,18 @@
 
       <!-- Live Log Terminal -->
       <div class="terminal-card">
-        <div class="terminal-header">
+        <div class="terminal-header" style="background:rgba(255,255,255,0.03); padding:10px 15px;">
           <div class="terminal-controls">
             <span class="control-dot red"></span>
             <span class="control-dot yellow"></span>
             <span class="control-dot green"></span>
           </div>
-          <div class="terminal-title">cybershield_soc_v3.0.0 — siem_engine — (120x30)</div>
-          <span class="live-indicator"><span class="live-dot"></span>LIVE</span>
+          <div class="terminal-title"
+            style="font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:1px;">
+            CYBERSHIELD_SIEM_v4.2</div>
+          <div class="nav-status">
+            <div class="status-dot"></div> LIVE_FEED
+          </div>
         </div>
         <div class="terminal-body" #systemTerminal>
           @if (logs().length === 0) {
@@ -421,48 +608,53 @@
          THREATS VIEW
          ═══════════════════════════ -->
   @if (currentView() === 'threats') {
-  <section class="view" id="view-threats">
+  <section class="view animate-fade" id="view-threats">
     <div class="view-header">
-      <h2>⚡ Threat Intelligence Center</h2>
-      <div style="display:flex; gap: 0.75rem;">
-        <span class="live-indicator"><span class="live-dot"></span>{{ threats().length }} Active Threats</span>
-        <button class="action-btn primary" (click)="showToast('Refreshing threat feed...','info','📡')"
-          id="btn-refresh-threats">Refresh Feed</button>
+      <div class="header-main">
+        <div class="section-sub">Real-Time Intel</div>
+        <h2>THREAT INTELLIGENCE CENTER</h2>
+      </div>
+      <div class="header-actions">
+        <span class="nav-status" style="margin-right:15px;">
+          <div class="status-dot"></div> {{ threats().length }} ACTIVE THREATS
+        </span>
+        <button class="btn-primary small" (click)="showToast('Refreshing threat feed...','info','📡')"
+          id="btn-refresh-threats">REFRESH FEED</button>
       </div>
     </div>
 
-    <div class="threats-table-container">
-      <table class="threats-table" aria-label="Active Threats">
-        <thead>
-          <tr>
-            <th>Threat ID</th>
-            <th>Type</th>
-            <th>Severity</th>
-            <th>Source IP</th>
-            <th>Target</th>
-            <th>Vector</th>
-            <th>Detected</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (threat of threats(); track threat.id) {
-          <tr>
-            <td class="threat-id-cell">{{ threat.id }}</td>
-            <td>{{ threat.type }}</td>
-            <td><span class="severity-badge" [class]="threat.severity">{{ threat.severity }}</span></td>
-            <td class="mono-cell">{{ threat.source }}</td>
-            <td>{{ threat.target }}</td>
-            <td class="mono-cell small-text">{{ threat.attackVector }}</td>
-            <td class="mono-cell small-text">{{ threat.detected }}</td>
-            <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{ threat.status }}</span></td>
-            <td><button class="table-action-btn" (click)="performThreatAction(threat)"
-                [id]="'action-' + threat.id">Analyse</button></td>
-          </tr>
-          }
-        </tbody>
-      </table>
+    <div class="card overflow-hidden">
+      <div class="threats-table-container">
+        <table class="threats-table" aria-label="Active Threats">
+          <thead>
+            <tr>
+              <th>THREAT ID</th>
+              <th>TYPE</th>
+              <th>SEVERITY</th>
+              <th>SOURCE</th>
+              <th>VECTOR</th>
+              <th>DETECTED</th>
+              <th>STATUS</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (threat of threats(); track threat.id) {
+            <tr>
+              <td class="threat-id-cell">{{ threat.id }}</td>
+              <td>{{ threat.type }}</td>
+              <td><span class="severity-badge" [class]="threat.severity">{{ threat.severity }}</span></td>
+              <td class="mono-cell" style="font-size:11px;">{{ threat.source }}</td>
+              <td class="mono-cell small-text" style="opacity:0.7;">{{ threat.attackVector }}</td>
+              <td class="mono-cell small-text">{{ threat.detected }}</td>
+              <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{ threat.status }}</span></td>
+              <td><button class="btn-outline small" (click)="performThreatAction(threat)"
+                  [id]="'action-' + threat.id">ANALYSE</button></td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
   }
@@ -471,16 +663,25 @@
          INCIDENTS — KANBAN
          ═══════════════════════════ -->
   @if (currentView() === 'incidents') {
-  <section class="view" id="view-incidents">
+  <section class="view animate-fade" id="view-incidents">
     <div class="view-header">
-      <h2>🔥 Incident Response</h2>
-      <span class="live-indicator"><span class="live-dot"></span>{{ incidents().length }} Tracked</span>
+      <div class="header-main">
+        <div class="section-sub">Response Lifecycle</div>
+        <h2>INCIDENT ORCHESTRATION</h2>
+      </div>
+      <div class="nav-status">
+        <div class="status-dot"></div> {{ incidents().length }} TOTAL CASES
+      </div>
     </div>
+
     <div class="incidents-kanban">
       @for (status of ['detected', 'investigating', 'containing', 'resolved']; track status) {
       <div class="kanban-column">
         <div class="column-header" [class]="status">
-          <h4>{{ status }}</h4>
+          <div class="column-title">
+            <div class="status-dot"></div>
+            <h4>{{ status.toUpperCase() }}</h4>
+          </div>
           <span class="count">{{ getIncidentsByStatus(status).length }}</span>
         </div>
         <div class="column-body">
@@ -492,29 +693,26 @@
                 <span class="severity-badge" [class]="inc.severity">{{ inc.severity }}</span>
               </div>
               <div class="kanban-card-title">{{ inc.type }}</div>
-              <div class="kanban-card-time">🕐 {{ inc.time }}</div>
+              <div class="kanban-card-time" style="font-family:var(--font-mono); font-size:9px;">{{ inc.time }}</div>
             </div>
             <div class="kanban-card-actions">
               @if (status === 'detected') {
-              <button (click)="updateIncidentStatus(inc.id, 'investigating')">Investigate →</button>
+              <button class="btn-outline small full-width"
+                (click)="updateIncidentStatus(inc.id, 'investigating')">INVESTIGATE →</button>
               }
               @if (status === 'investigating') {
-              <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'detected')">← Reset</button>
-              <button (click)="updateIncidentStatus(inc.id, 'containing')">Contain →</button>
+              <button class="btn-outline small" (click)="updateIncidentStatus(inc.id, 'containing')">CONTAIN →</button>
               }
               @if (status === 'containing') {
-              <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'investigating')">← Back</button>
-              <button (click)="updateIncidentStatus(inc.id, 'resolved')">Resolve ✓</button>
-              }
-              @if (status === 'resolved') {
-              <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'containing')">← Reopen</button>
+              <button class="btn-outline small" (click)="updateIncidentStatus(inc.id, 'resolved')">RESOLVE ✓</button>
               }
             </div>
           </div>
           }
           @if (getIncidentsByStatus(status).length === 0) {
           <div class="kanban-empty">
-            <span>✓ No {{ status }} incidents</span>
+            <div style="font-size:18px; margin-bottom:5px;">🛡</div>
+            <span>Perimeter Secure</span>
           </div>
           }
         </div>
@@ -528,38 +726,49 @@
          VULNERABILITIES VIEW
          ═══════════════════════════ -->
   @if (currentView() === 'vulnerabilities') {
-  <section class="view" id="view-vulnerabilities">
+  <section class="view animate-fade" id="view-vulnerabilities">
     <div class="view-header">
-      <h2>🔓 Vulnerability Assessment</h2>
-      <div style="display:flex; align-items:center; gap:1rem;">
+      <div class="header-main">
+        <div class="section-sub">Surface Analysis</div>
+        <h2>VULNERABILITY ASSESSMENT</h2>
+      </div>
+      <div style="display:flex; align-items:center; gap:1.5rem;">
         @if (isScannerActive()) {
         <div class="scan-progress-wrap">
-          <span class="scan-label">Scanning... {{ scanProgress().toFixed(0) }}%</span>
+          <span class="scan-label">SCANNING MATRIX... {{ scanProgress().toFixed(0) }}%</span>
           <div class="scan-bar">
             <div class="scan-fill" [style.width.%]="scanProgress()"></div>
           </div>
         </div>
         }
-        <button class="action-btn primary" (click)="runScan()" [disabled]="isScannerActive()" id="btn-run-scan">
-          {{ isScannerActive() ? '⟳ Scanning...' : '⬡ Run Full Scan' }}
+        <button class="btn-primary" (click)="runScan()" [disabled]="isScannerActive()" id="btn-run-scan">
+          {{ isScannerActive() ? 'ANALYSING...' : 'RUN FULL AUDIT' }}
         </button>
       </div>
     </div>
+
     <div class="vulnerabilities-list">
       @for (vuln of vulnerabilities(); track vuln.id) {
-      <div class="vuln-item" [class]="vuln.severity">
-        <div class="vuln-item-header">
-          <h3 class="vuln-title">{{ vuln.title }}</h3>
-          <span class="vuln-cve">{{ vuln.id }}</span>
-        </div>
-        <p class="vuln-description">{{ vuln.description }}</p>
-        <div class="vuln-footer">
-          <span>CVSS: <strong style="color: var(--color-danger)">{{ vuln.score }}/10</strong></span>
-          <span>Affected Systems: <strong>{{ vuln.systems }}</strong></span>
-          @if (vuln.patch) {
-          <span>Patch: <strong style="color:var(--color-success)">{{ vuln.patch }}</strong></span>
-          }
+      <div class="vuln-item card" [class]="vuln.severity" style="padding:20px; margin-bottom:15px;">
+        <div class="vuln-item-header"
+          style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+          <div>
+            <h3 class="vuln-title"
+              style="font-family:var(--font-display); font-size:1.4rem; color:white; letter-spacing:1px;">{{ vuln.title
+              }}</h3>
+            <span class="vuln-cve" style="font-family:var(--font-mono); font-size:10px; color:var(--accent);">{{ vuln.id
+              }}</span>
+          </div>
           <span class="severity-badge" [class]="vuln.severity">{{ vuln.severity }}</span>
+        </div>
+        <p class="vuln-description" style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:15px;">{{
+          vuln.description }}</p>
+        <div class="vuln-footer" style="display:flex; gap:20px; font-family:var(--font-mono); font-size:11px;">
+          <span>CVSS: <strong style="color: var(--warn)">{{ vuln.score }}</strong></span>
+          <span>AFFECTED: <strong style="color:white">{{ vuln.systems }} NODES</strong></span>
+          @if (vuln.patch) {
+          <span>REMEDIATION: <strong style="color:var(--accent2)">{{ vuln.patch }}</strong></span>
+          }
         </div>
       </div>
       }
@@ -571,43 +780,55 @@
          DARKNET MONITOR VIEW (NEW)
          ═══════════════════════════ -->
   @if (currentView() === 'darknet') {
-  <section class="view" id="view-darknet">
+  <section class="view animate-fade" id="view-darknet">
     <div class="view-header">
-      <h2>👁 Darknet Monitor</h2>
-      <div style="display:flex; align-items:center; gap:0.75rem;">
-        <span class="darknet-live-badge"><span class="live-dot"></span>MONITORING ACTIVE</span>
-        <button class="action-btn primary" (click)="showToast('Scanning darknet sources...','info','👁')"
-          id="btn-darknet-scan">Refresh Intel</button>
+      <div class="header-main">
+        <div class="section-sub">Deep Web Reconnaissance</div>
+        <h2>DARKNET MONITOR</h2>
+      </div>
+      <div class="header-actions">
+        <span class="darknet-live-badge" style="margin-right:15px;">
+          <div class="status-dot"></div> MONITORING ACTIVE
+        </span>
+        <button class="btn-primary small" (click)="showToast('Scanning darknet sources...','info','👁')"
+          id="btn-darknet-scan">REFRESH INTEL</button>
       </div>
     </div>
 
     <div class="darknet-alert-banner">
-      <span class="darknet-alert-icon">⚠</span>
+      <div class="status-dot" style="background:var(--warn); box-shadow:0 0 10px var(--warn);"></div>
       <div>
-        <strong>{{ criticalDarknetCount() }}</strong> Critical Threats detected across
-        monitored dark web forums and marketplaces.
-        Immediate action required for DN-001 and DN-005.
+        <strong style="color:var(--warn); font-family:var(--font-mono);">{{ criticalDarknetCount() }} CRITICAL
+          THREATS</strong> detected across global marketplaces. Identity integrity risks identified on node JHB-772.
       </div>
     </div>
 
     <div class="darknet-grid">
       @for (item of darknetFeed(); track item.id) {
-      <div class="darknet-card" [class]="item.risk">
-        <div class="darknet-card-header">
+      <div class="darknet-card card" [class]="item.risk" style="padding:20px;">
+        <div class="darknet-card-header"
+          style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
           <div class="darknet-card-meta">
-            <span class="darknet-id">{{ item.id }}</span>
-            <span class="darknet-type-badge">{{ item.type }}</span>
+            <span class="darknet-id"
+              style="font-family:var(--font-mono); font-size:10px; color:var(--accent); display:block;">{{ item.id
+              }}</span>
+            <span class="darknet-type-badge"
+              style="font-family:var(--font-mono); font-size:9px; color:var(--muted); text-transform:uppercase;">{{
+              item.type }}</span>
           </div>
-          <span class="status-badge" [class]="item.status">{{ item.status }}</span>
+          <span class="status-badge" [class]="item.status">{{ item.status.toUpperCase() }}</span>
         </div>
-        <p class="darknet-description">{{ item.description }}</p>
-        <div class="darknet-card-footer">
-          <span class="darknet-time">⏱ Discovered: {{ item.discovered }}</span>
-          <span class="severity-badge" [class]="item.risk">{{ item.risk }}</span>
+        <p class="darknet-description" style="font-size:12px; color:var(--text); line-height:1.5; margin-bottom:15px;">
+          {{ item.description }}</p>
+        <div class="darknet-card-footer"
+          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <span class="darknet-time" style="font-family:var(--font-mono); font-size:9px; color:var(--muted);">⏱ {{
+            item.discovered }}</span>
+          <span class="severity-badge" [class]="item.risk" style="font-size:9px;">{{ item.risk }}</span>
         </div>
-        <button class="darknet-action-btn" (click)="showToast('Tracking item ' + item.id + '...', 'warning', '👁')"
-          [id]="'darknet-action-' + item.id">
-          Initiate Takedown
+        <button class="btn-primary small full-width"
+          (click)="showToast('Tracking item ' + item.id + '...', 'warning', '👁')" [id]="'darknet-action-' + item.id">
+          INITIATE TAKEDOWN
         </button>
       </div>
       }
@@ -619,27 +840,314 @@
          COMPLIANCE VIEW
          ═══════════════════════════ -->
   @if (currentView() === 'compliance') {
-  <section class="view" id="view-compliance">
+  <section class="view animate-fade" id="view-compliance">
     <div class="view-header">
-      <h2>✓ Compliance &amp; Reporting</h2>
-      <button class="action-btn primary" (click)="generateReport()" id="btn-generate-report">Generate Report</button>
+      <div class="header-main">
+        <div class="section-sub">Governance Monitor</div>
+        <h2>REGULATORY COMPLIANCE</h2>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" (click)="generateReport()">GENERATE AUDIT REPORT</button>
+      </div>
     </div>
-    <div class="compliance-frameworks">
-      @for (framework of complianceFrameworks(); track framework.name) {
-      <div class="framework-card">
-        <div class="framework-header">
-          <h3>{{ framework.name }}</h3>
-          <span class="compliance-score">{{ framework.score }}%</span>
+
+    <div class="compliance-grid">
+      @for (item of complianceFrameworks(); track item.name) {
+      <div class="compliance-card card" style="padding:24px;">
+        <div class="comp-header"
+          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h3 style="font-family:var(--font-display); font-size:1.6rem; color:white; letter-spacing:1px;">{{ item.name
+            }}</h3>
+          <span class="comp-score" [class.high]="item.score >= 90" [class.med]="item.score >= 80"
+            [class.low]="item.score < 80" style="font-family:var(--font-display); font-size:1.4rem;">
+            {{ item.score }}%
+          </span>
         </div>
-        <div class="compliance-bar">
-          <div class="compliance-fill" [style.width.%]="framework.score"></div>
+        <div class="progress-bar-bg" style="height:6px; margin-bottom:15px;">
+          <div class="progress-bar-fill" [style.width.%]="item.score"
+            [style.background]="item.score >= 90 ? 'var(--accent2)' : (item.score >= 80 ? 'var(--accent)' : 'var(--warn)')">
+          </div>
         </div>
-        <div class="compliance-detail">
-          <span class="framework-status">{{ framework.status }}</span>
-          <span class="framework-controls">{{ framework.passed }}/{{ framework.controls }} controls</span>
+        <div class="comp-details" style="font-family:var(--font-mono); font-size:11px; color:var(--muted);">
+          <div style="color:white; margin-bottom:4px;">{{ item.passed }} / {{ item.controls }} CONTROLS PASSED</div>
+          <div [style.color]="item.score >= 90 ? 'var(--accent2)' : 'var(--muted)'">{{ item.status.toUpperCase() }}
+          </div>
         </div>
       </div>
       }
+    </div>
+  </section>
+  }
+
+  <!-- ENTERPRISE HUB VIEW -->
+  @if (currentView() === 'enterprise') {
+  <section class="view animate-fade" id="view-enterprise">
+    <div class="view-header">
+      <div class="header-main">
+        <div class="section-sub">Global Asset Management</div>
+        <h2>ENTERPRISE DEVICE HUB</h2>
+      </div>
+      <div class="nav-status">
+        <div class="status-dot"></div> {{ fleetStatus().activeDrivers }} DRIVERS PROTECTED
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card info">
+        <div class="metric-header">
+          <h4>Fleet Coverage</h4>
+        </div>
+        <div class="metric-value"><span class="value">{{ fleetStatus().globalCoverage }}</span></div>
+        <p style="font-size:11px; color:var(--muted); margin-top:5px;">Real-time GPS security tracking active.</p>
+      </div>
+      <div class="metric-card warning">
+        <div class="metric-header">
+          <h4>Safety Alerts</h4>
+        </div>
+        <div class="metric-value"><span class="value">{{ fleetStatus().safetyAlerts }}</span></div>
+        <p style="font-size:11px; color:var(--muted); margin-top:5px;">Potential route deviations detected.</p>
+      </div>
+    </div>
+
+    <div class="grid-2-1" style="display:grid; grid-template-columns: 2fr 1fr; gap:24px; margin-top:24px;">
+      <div class="card overflow-hidden">
+        <div class="card-header" style="padding:20px; border-bottom:1px solid var(--border);">
+          <h3 style="font-family:var(--font-display); font-size:1.2rem; color:white;">Global Device Matrix</h3>
+        </div>
+        <div class="table-wrap">
+          <table class="threats-table">
+            <thead>
+              <tr>
+                <th>ASSET ID</th>
+                <th>DEVICE</th>
+                <th>USER/DRIVER</th>
+                <th>LAT/LNG</th>
+                <th>STATUS</th>
+                <th>SYNC</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (dev of enterpriseDevices(); track dev.id) {
+              <tr>
+                <td class="mono-cell" style="color:var(--accent);">{{ dev.id }}</td>
+                <td>{{ dev.name }} ({{ dev.type }})</td>
+                <td>{{ dev.user }}</td>
+                <td class="mono-cell" style="font-size:10px;">{{ dev.location?.lat?.toFixed(4) }}, {{
+                  dev.location?.lng?.toFixed(4) }}</td>
+                <td><span class="status-badge" [class]="dev.status">{{ dev.status.toUpperCase() }}</span></td>
+                <td style="font-size:11px; color:var(--muted);">{{ dev.lastSync }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="padding:20px;">
+        <h3 style="font-family:var(--font-display); font-size:1.2rem; color:white; margin-bottom:15px;">Safety Monitor
+        </h3>
+        <div class="safety-log" style="font-family:var(--font-mono); font-size:11px; color:var(--muted);">
+          <div
+            style="margin-bottom:10px; padding:10px; background:rgba(255,140,0,0.05); border-left:2px solid var(--orange);">
+            <div style="color:var(--orange);">ALERT: JHB-Fleet-02</div>
+            <div>Driver safety at risk. Deviation detected in Bramley area. Monitoring neural pulse...</div>
+          </div>
+          <div
+            style="margin-bottom:10px; padding:10px; background:rgba(0,212,255,0.05); border-left:2px solid var(--accent);">
+            <div>CPT-Fleet-04</div>
+            <div>Asset secured. Route integrity 100%.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- NEURAL SHIELD VIEW -->
+  @if (currentView() === 'comm-shield') {
+  <section class="view animate-fade" id="view-comm-shield">
+    <div class="view-header">
+      <div class="header-main">
+        <div class="section-sub">Communication Intercept</div>
+        <h2>NEURAL COMMUNICATION SHIELD</h2>
+      </div>
+      <div class="nav-status">
+        <div class="status-dot"></div> AI AGENT ACTIVE
+      </div>
+    </div>
+
+    <div class="card"
+      style="margin-bottom:24px; padding:30px; text-align:center; background:radial-gradient(circle at center, rgba(155, 89, 255, 0.05), transparent);">
+      <div style="font-size:48px; margin-bottom:15px;">👤</div>
+      <h3 style="font-family:var(--font-display); font-size:2rem; color:white; letter-spacing:2px;">IDENTITY PROTECTOR
+      </h3>
+      <p style="color:var(--muted); max-width:600px; margin:0 auto;">CyberShield AI is actively intercepting harmful
+        emails, robocalls, and smishing attacks before they reach your operators. 14,000+ signatures updated this hour.
+      </p>
+    </div>
+
+    <div class="grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+      <div class="card">
+        <div class="card-header" style="padding:20px; border-bottom:1px solid var(--border);">
+          <h3 style="font-family:var(--font-display); color:white;">Harmful Comm Blocked</h3>
+        </div>
+        @for (alert of commShieldAlerts(); track alert.id) {
+        <div
+          style="padding:15px; border-bottom:1px solid rgba(255,255,255,0.03); display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent);">{{ alert.source }}</div>
+            <div style="font-size:13px; color:white; margin:4px 0;">{{ alert.threatDescription }}</div>
+            <div style="font-size:9px; color:var(--muted);">{{ alert.timestamp }} • TYPE: {{ alert.type.toUpperCase() }}
+            </div>
+          </div>
+          <span class="status-badge" [class]="alert.actionTaken">{{ alert.actionTaken.toUpperCase() }}</span>
+        </div>
+        }
+      </div>
+
+      <div class="card" style="padding:20px;">
+        <h3 style="font-family:var(--font-display); color:white; margin-bottom:15px;">Spam/Fraud Database</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div
+            style="padding:12px; background:rgba(255,255,255,0.02); border-radius:6px; font-size:12px; display:flex; justify-content:space-between;">
+            <span>Robocal IDs</span> <span style="color:var(--warn);">24,882 Known</span>
+          </div>
+          <div
+            style="padding:12px; background:rgba(255,255,255,0.02); border-radius:6px; font-size:12px; display:flex; justify-content:space-between;">
+            <span>Phishing Domains</span> <span style="color:var(--warn);">112,400 Known</span>
+          </div>
+          <div
+            style="padding:12px; background:rgba(255,255,255,0.02); border-radius:6px; font-size:12px; display:flex; justify-content:space-between;">
+            <span>AI Block Success Rate</span> <span style="color:var(--accent2);">99.98%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- SYSTEM CHECKUP VIEW (PREMIUM) -->
+  @if (currentView() === 'checkup') {
+  <section class="view animate-fade" id="view-checkup">
+    <div class="section-wrap">
+      <div class="section-sub">Identity Integrity Scan</div>
+      <div class="section-title">NEURAL SYSTEM CHECKUP</div>
+
+      <div class="scan-container">
+        <div class="scan-body">
+          <div class="scan-input-area">
+            <div class="results-title">SCAN PARAMETERS</div>
+            <div class="scan-types">
+              <div class="scan-type selected" (click)="showToast('Email scan active', 'info', '📧')">
+                <div class="scan-check">✓</div>
+                <div>
+                  <div class="scan-type-name">EMAIL SCAN</div>
+                  <div class="scan-type-sub">Checks credential dumps</div>
+                </div>
+              </div>
+              <div class="scan-type selected" (click)="showToast('ID scan active', 'info', '🆔')">
+                <div class="scan-check">✓</div>
+                <div>
+                  <div class="scan-type-name">ID VERIFICATION</div>
+                  <div class="scan-type-sub">Identity cross-reference</div>
+                </div>
+              </div>
+              <div class="scan-type selected" (click)="showToast('Phone scan active', 'info', '📱')">
+                <div class="scan-check">✓</div>
+                <div>
+                  <div class="scan-type-name">PHONE MONITOR</div>
+                  <div class="scan-type-sub">SIM-swap & leak check</div>
+                </div>
+              </div>
+              <div class="scan-type" (click)="showToast('Deep web scan available in Pro', 'warning', '🌑')">
+                <div class="scan-check"></div>
+                <div>
+                  <div class="scan-type-name">DEEP WEB SCAN</div>
+                  <div class="scan-type-sub">Paid feature only</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Professional Email</label>
+              <input type="email" placeholder="e.g. analyst@cybershield.so" [value]="checkupForm().email"
+                (input)="updateCheckupForm('email', $event)">
+            </div>
+
+            <div class="scan-url-group">
+              <div class="form-group" style="flex:1">
+                <label>ID Number</label>
+                <input type="text" placeholder="RSA ID / Passport" [value]="checkupForm().idNumber"
+                  (input)="updateCheckupForm('idNumber', $event)">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label>Mobile Number</label>
+                <input type="text" placeholder="+27 ..." [value]="checkupForm().phone"
+                  (input)="updateCheckupForm('phone', $event)">
+              </div>
+            </div>
+
+            <button class="btn-scan full-width" [disabled]="isSystemScanning()" (click)="runPersonalCheckup()">
+              @if (isSystemScanning()) {
+              <span class="loader"></span> ANALYSING ENTROPY...
+              } @else {
+              LAUNCH MULTI-LAYER SCAN
+              }
+            </button>
+
+            @if (isSystemScanning()) {
+            <div class="scan-progress">
+              <div class="progress-header">
+                <span class="progress-label">NEURAL MATRIX SEARCH</span>
+                <span class="progress-pct">42%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: 42%"></div>
+              </div>
+              <div class="scan-log">
+                <div class="log-line">Connecting to Node [JHB-772]... <span class="log-ok">OK</span></div>
+                <div class="log-line">Parsing dump files (12.4 GB)... <span class="log-ok">OK</span></div>
+                <div class="log-line">Running fuzzy match on email... <span class="log-info">SEARCHING</span></div>
+                <div class="log-line">Cross-referencing global databases...</div>
+                <div class="log-line">Anomaly detected on Cluster 4... <span class="log-warn">WARN</span></div>
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="scan-results-area">
+            <div class="scan-results">
+              <div class="results-title">SCAN RESULTS</div>
+
+              @if (checkupResults().length === 0 && !isSystemScanning()) {
+              <div style="text-align:center;padding:40px 0;opacity:0.5;">
+                <div style="font-size:30px;margin-bottom:10px;">📋</div>
+                <div class="result-name">WAITING FOR EXECUTION</div>
+              </div>
+              }
+
+              @for (res of checkupResults(); track res.category) {
+              <div class="result-item">
+                <div>
+                  <div class="result-name">{{ res.category }}</div>
+                  <div class="footer-text" style="font-size:10px;">{{ res.lastChecked }}</div>
+                </div>
+                <div class="result-val" [class.val-safe]="res.status === 'clean'"
+                  [class.val-warn]="res.status === 'warning'" [class.val-danger]="res.status === 'compromised'">
+                  {{ res.status.toUpperCase() }}
+                </div>
+              </div>
+              <div style="font-size:10px;color:var(--muted);margin-bottom:10px;padding-top:4px;">{{ res.message }}</div>
+              }
+
+              <div class="radar-wrapper">
+                <div class="radar-label">NEURAL MATRIX STATUS</div>
+                <div class="radar-scan" style="margin: 0 auto;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
   }

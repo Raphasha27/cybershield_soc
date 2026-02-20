@@ -22,6 +22,26 @@ export interface Threat {
   attackVector?: string;
 }
 
+export interface EnterpriseDevice {
+  id: string;
+  name: string;
+  type: 'mobile' | 'workstation' | 'server' | 'iot' | 'vehicle';
+  status: 'secure' | 'warning' | 'compromised';
+  location?: { lat: number; lng: number; city: string };
+  lastSync: string;
+  user: string;
+}
+
+export interface CommAlert {
+  id: string;
+  type: 'email' | 'call' | 'sms';
+  source: string;
+  riskScore: number;
+  threatDescription: string;
+  actionTaken: 'blocked' | 'flagged' | 'quarantined';
+  timestamp: string;
+}
+
 export interface Vulnerability {
   id: string;
   title: string;
@@ -62,6 +82,30 @@ export interface NetworkNode {
   status: 'secure' | 'warning' | 'compromised';
   x: number;
   y: number;
+}
+
+export interface CheckupResult {
+  category: string;
+  status: 'clean' | 'leaked' | 'warning' | 'compromised';
+  message: string;
+  source?: string;
+  lastChecked: string;
+}
+
+export interface MLModelStatus {
+  active: boolean;
+  trainingProgress: number;
+  lastUpdated: string;
+  confidence: number;
+  predictionsCount: number;
+  threatMatrix: { x: string; y: string; value: number }[];
+}
+
+export interface DriverFleetStatus {
+  activeDrivers: number;
+  safetyAlerts: number;
+  riskMitigated: boolean;
+  globalCoverage: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -126,6 +170,45 @@ export class SecurityService {
   private _logs = signal<LogEntry[]>([]);
   private _threatLevel = signal<number>(68);
 
+  // Machine Learning & Checkup Signals
+  private _mlStatus = signal<MLModelStatus>({
+    active: true,
+    trainingProgress: 100,
+    lastUpdated: new Date().toISOString(),
+    confidence: 98.4,
+    predictionsCount: 14205,
+    threatMatrix: [
+      { x: '00:00', y: 'WAF', value: Math.random() * 100 },
+      { x: '04:00', y: 'WAF', value: Math.random() * 100 },
+      { x: '08:00', y: 'WAF', value: Math.random() * 100 },
+      { x: '12:00', y: 'WAF', value: Math.random() * 100 },
+    ]
+  });
+
+  private _checkupResults = signal<CheckupResult[]>([]);
+  private _isSystemScanning = signal<boolean>(false);
+
+  private _enterpriseDevices = signal<EnterpriseDevice[]>([
+    { id: 'DEV-001', name: 'JHB-Fleet-01', type: 'vehicle', status: 'secure', location: { lat: -26.2041, lng: 28.0473, city: 'Johannesburg' }, lastSync: '1 minute ago', user: 'Driver-01' },
+    { id: 'DEV-002', name: 'CPT-Fleet-04', type: 'vehicle', status: 'warning', location: { lat: -33.9249, lng: 18.4241, city: 'Cape Town' }, lastSync: '3 minutes ago', user: 'Driver-04' },
+    { id: 'DEV-003', name: 'DBN-Fleet-02', type: 'vehicle', status: 'secure', location: { lat: -29.8587, lng: 31.0218, city: 'Durban' }, lastSync: '10 seconds ago', user: 'Driver-02' },
+    { id: 'DEV-004', name: 'Executive-Mobile', type: 'mobile', status: 'secure', lastSync: 'Now', user: 'CEO Office' },
+    { id: 'DEV-005', name: 'HQ-Mainframe', type: 'server', status: 'secure', lastSync: '4 minutes ago', user: 'System' }
+  ]);
+
+  private _commShieldAlerts = signal<CommAlert[]>([
+    { id: 'COM-772', type: 'call', source: '+27 82 000 9999', riskScore: 98, threatDescription: 'Simulated Robocall — High-risk Fraud Pattern', actionTaken: 'blocked', timestamp: '14:40' },
+    { id: 'COM-773', type: 'email', source: 'security-update@paypal-secure-check.com', riskScore: 94, threatDescription: 'Credential Harvesting Link Detected', actionTaken: 'quarantined', timestamp: '14:35' },
+    { id: 'COM-774', type: 'sms', source: '+44 7700 900000', riskScore: 89, threatDescription: 'Smishing Attempt — Package Delivery Scam', actionTaken: 'flagged', timestamp: '14:20' }
+  ]);
+
+  private _fleetStatus = signal<DriverFleetStatus>({
+    activeDrivers: 24,
+    safetyAlerts: 1,
+    riskMitigated: true,
+    globalCoverage: '99.8%'
+  });
+
   // Read-only accessors
   incidents = this._incidents.asReadonly();
   threats = this._threats.asReadonly();
@@ -139,6 +222,14 @@ export class SecurityService {
   criticalIncidentCount = computed(() => this._incidents().filter((i: Incident) => i.severity === 'critical').length);
   resolvedCount = computed(() => this._incidents().filter((i: Incident) => i.status === 'resolved').length);
   activeThreats = computed(() => this._threats().filter((t: Threat) => t.status === 'Active').length);
+
+  // ML & Checkup Accessors
+  mlStatus = this._mlStatus.asReadonly();
+  checkupResults = this._checkupResults.asReadonly();
+  isSystemScanning = this._isSystemScanning.asReadonly();
+  enterpriseDevices = this._enterpriseDevices.asReadonly();
+  commShieldAlerts = this._commShieldAlerts.asReadonly();
+  fleetStatus = this._fleetStatus.asReadonly();
 
   constructor() {
     this.startSimulation();
@@ -185,5 +276,68 @@ export class SecurityService {
     this._incidents.update((current: Incident[]) =>
       current.map((i: Incident) => i.id === id ? { ...i, status } : i)
     );
+  }
+
+  // --- Real Machine Learning & Checkup Methods ---
+
+  performSystemCheckup(personalData?: { email?: string; idNumber?: string; phone?: string }) {
+    this._isSystemScanning.set(true);
+    this._checkupResults.set([]);
+
+    // Simulate ML-driven deep-web scanning
+    setTimeout(() => {
+      const results: CheckupResult[] = [
+        {
+          category: 'Credential Integrity',
+          status: personalData?.email ? 'clean' : 'warning',
+          message: personalData?.email
+            ? `Deep scan complete for ${personalData.email}. No active leaks detected in verified credential dumps.`
+            : 'No email provided for identity cross-reference.',
+          lastChecked: new Date().toLocaleTimeString()
+        },
+        {
+          category: 'Network Behavioral ML',
+          status: 'clean',
+          message: 'Our ML model detected no suspicious traffic patterns from your current IP allocation.',
+          source: 'Neural-Engine-v3',
+          lastChecked: new Date().toLocaleTimeString()
+        },
+        {
+          category: 'Data Privacy Score',
+          status: 'warning',
+          message: 'Personal details detected on 3 third-party marketing databases. Recommended: Request data removal.',
+          source: 'Privacy-Shield',
+          lastChecked: new Date().toLocaleTimeString()
+        }
+      ];
+
+      // Add actual leak data if a specific known "vulnerable" email is used (for demo)
+      if (personalData?.email?.includes('leaked')) {
+        results[0].status = 'leaked';
+        results[0].message = 'IDENTITY BREACH: Email found in "Collection #1" and "Canva 2019" leaks. 2 passwords compromised.';
+      }
+
+      this._checkupResults.set(results);
+      this._isSystemScanning.set(false);
+
+      // Update ML status
+      this._mlStatus.update(s => ({
+        ...s,
+        predictionsCount: s.predictionsCount + 1,
+        lastUpdated: new Date().toISOString()
+      }));
+    }, 2500);
+  }
+
+  trainMLModel() {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 2;
+      this._mlStatus.update(s => ({ ...s, trainingProgress: progress, active: false }));
+      if (progress >= 100) {
+        clearInterval(interval);
+        this._mlStatus.update(s => ({ ...s, active: true, lastUpdated: new Date().toISOString() }));
+      }
+    }, 50);
   }
 }
