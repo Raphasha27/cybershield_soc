@@ -1,177 +1,276 @@
-<!-- Header -->
+<!-- ═══════════════════════════════════════════════
+     CYBERSHIELD SOC — ENHANCED TEMPLATE
+     ═══════════════════════════════════════════════ -->
+
+<!-- HEADER -->
 <header class="header">
   <div class="header-content">
+
+    <!-- Logo -->
     <div class="logo-section">
-      <div class="logo-icon">🛡️</div>
+      <div class="logo-icon-wrap">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-pulse"></span>
+      </div>
       <div class="logo-text">
         <h1>CyberShield</h1>
         <span class="logo-subtitle">Security Operations Center</span>
       </div>
     </div>
-    
-    <nav class="main-nav">
-      <button class="nav-btn" [class.active]="currentView() === 'dashboard'" (click)="setView('dashboard')">
-        <span class="nav-icon">📊</span>
-        Dashboard
+
+    <!-- Nav -->
+    <nav class="main-nav" role="navigation" aria-label="Main navigation">
+      @for (item of navItems; track item.id) {
+      <button class="nav-btn" [class.active]="currentView() === item.id" (click)="setView(item.id)"
+        [attr.aria-current]="currentView() === item.id ? 'page' : null" [id]="'nav-' + item.id">
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+        @if (item.id === 'darknet') {
+        <span class="nav-badge darknet">{{ darknetFeed().length }}</span>
+        }
       </button>
-      <button class="nav-btn" [class.active]="currentView() === 'threats'" (click)="setView('threats')">
-        <span class="nav-icon">⚠️</span>
-        Threats
-      </button>
-      <button class="nav-btn" [class.active]="currentView() === 'incidents'" (click)="setView('incidents')">
-        <span class="nav-icon">🚨</span>
-        Incidents
-      </button>
-      <button class="nav-btn" [class.active]="currentView() === 'vulnerabilities'" (click)="setView('vulnerabilities')">
-        <span class="nav-icon">🔍</span>
-        Vulnerabilities
-      </button>
-      <button class="nav-btn" [class.active]="currentView() === 'compliance'" (click)="setView('compliance')">
-        <span class="nav-icon">📋</span>
-        Compliance
-      </button>
+      }
     </nav>
-    
+
+    <!-- Actions -->
     <div class="header-actions">
-      <div class="search-bar">
-        <input type="text" placeholder="Search security events..." (keyup.enter)="search($event)">
-        <span class="search-icon">🔎</span>
+      <div class="search-bar" [class.focused]="isSearchFocused()">
+        <span class="search-icon-left">⬡</span>
+        <input id="global-search" type="text" placeholder="Search threats, incidents..." (keyup.enter)="search($event)"
+          (focus)="isSearchFocused.set(true)" (blur)="isSearchFocused.set(false)">
       </div>
-      <button class="alert-btn" (click)="toggleAlertPanel()">
-        <span class="alert-icon">🔔</span>
-        <span class="alert-badge">{{notifications().length}}</span>
+
+      <button id="alert-panel-btn" class="icon-btn" [class.active]="isAlertPanelOpen()" (click)="toggleAlertPanel()"
+        title="Security Alerts">
+        <span class="icon-btn-icon">🔔</span>
+        @if (notifications().length > 0) {
+        <span class="badge-count">{{ notifications().length }}</span>
+        }
       </button>
-      <button class="ai-toggle-btn" (click)="toggleAI()">
-        <span class="ai-icon">🤖</span>
+
+      <button id="ai-panel-btn" class="icon-btn ai-btn" [class.active]="isAIPanelOpen()" (click)="toggleAI()"
+        title="CyberSentinel AI">
+        <span class="ai-btn-glow"></span>
+        <span class="icon-btn-icon">◈</span>
       </button>
-      <button class="user-profile-btn" (click)="toggleProfileModal()">
+
+      <button id="profile-btn" class="user-profile-btn" (click)="toggleProfileModal()">
         <div class="user-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="Admin">
-          <span class="user-name">{{adminProfile().name}}</span>
+          <div class="user-avatar">{{ adminProfile().name.charAt(0) }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ adminProfile().name }}</span>
+            <span class="user-role">{{ adminProfile().role }}</span>
+          </div>
         </div>
       </button>
+    </div>
+
+  </div>
+
+  <!-- Threat Banner -->
+  <div class="threat-banner" [class.critical-mode]="threatLevel() > 80">
+    <div class="threat-banner-inner">
+      <div class="threat-level-info">
+        <span class="threat-label">THREAT LEVEL</span>
+        <span class="threat-status-text" [class.critical]="threatLevel() > 80"
+          [class.elevated]="threatLevel() > 60 && threatLevel() <= 80">
+          {{ threatLevel() > 80 ? 'CRITICAL' : (threatLevel() > 60 ? 'ELEVATED' : 'MODERATE') }}
+        </span>
+        <span class="threat-percent">{{ threatLevel().toFixed(1) }}%</span>
+      </div>
+      <div class="threat-gauge-bar">
+        <div class="gauge-fill" [style.width.%]="threatLevel()" [class.high]="threatLevel() > 80"
+          [class.medium]="threatLevel() > 60 && threatLevel() <= 80">
+        </div>
+      </div>
+      <div class="threat-meta">
+        <span class="threat-ai-label">◈ AI Heuristic Engine Active</span>
+        <button class="action-btn primary small" (click)="setView('threats')" id="banner-view-threats">View
+          Threats</button>
+      </div>
     </div>
   </div>
 </header>
 
-<!-- Main Content -->
+<!-- MAIN CONTENT -->
 <main class="main-content">
-  
-  <!-- Dashboard View -->
+
+  <!-- ═══════════════════════════
+       DASHBOARD VIEW
+       ═══════════════════════════ -->
   @if (currentView() === 'dashboard') {
-    <section class="view active">
-      <div class="threat-banner">
-        <div class="threat-banner-content">
-          <div class="threat-level">
-            <span class="threat-icon">⚡</span>
-            <div class="threat-info">
-              <div class="threat-title-row">
-                <h3>Current Threat Level: <span class="threat-status" [style.color]="threatLevel() > 70 ? 'var(--color-critical)' : 'var(--color-warning)'">
-                  {{ threatLevel() > 80 ? 'CRITICAL' : (threatLevel() > 60 ? 'ELEVATED' : 'MODERATE') }} ({{ threatLevel().toFixed(1) }}%)
-                </span></h3>
-                <button class="action-btn primary small" (click)="setView('threats')">View Details</button>
-              </div>
-              <p>Real-time heuristic analysis active</p>
-            </div>
-          </div>
-          <div class="threat-gauge">
-            <div class="gauge-fill" [style.width.%]="threatLevel()" [class.high]="threatLevel() > 70"></div>
-          </div>
+  <section class="view" id="view-dashboard">
+
+    <!-- Metric Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card critical" (click)="setView('threats')" id="metric-critical-alerts" tabindex="0"
+        role="button">
+        <div class="metric-card-bg"></div>
+        <div class="metric-header">
+          <span class="metric-icon">◉</span>
+          <h4>Critical Alerts</h4>
         </div>
+        <div class="metric-value">
+          <span class="value">{{ displayedCriticalAlerts() }}</span>
+          <span class="trend up">+12%</span>
+        </div>
+        <div class="metric-footer"><span class="metric-label">Last 24 hours</span></div>
+        <div class="metric-glow g-critical"></div>
       </div>
 
-      <div class="metrics-grid">
-        <div class="metric-card critical" (click)="setView('threats')">
-          <div class="metric-header"><span class="metric-icon">🔴</span><h4>Critical Alerts</h4></div>
-          <div class="metric-value"><span class="value">23</span><span class="trend up">+12%</span></div>
-          <div class="metric-footer"><span class="metric-label">Last 24 hours</span></div>
+      <div class="metric-card warning" (click)="setView('incidents')" id="metric-active-incidents" tabindex="0"
+        role="button">
+        <div class="metric-card-bg"></div>
+        <div class="metric-header">
+          <span class="metric-icon">◎</span>
+          <h4>Active Incidents</h4>
         </div>
-        <div class="metric-card warning" (click)="setView('incidents')">
-          <div class="metric-header"><span class="metric-icon">🟡</span><h4>Active Incidents</h4></div>
-          <div class="metric-value"><span class="value">47</span><span class="trend down">-8%</span></div>
-          <div class="metric-footer"><span class="metric-label">Requiring attention</span></div>
+        <div class="metric-value">
+          <span class="value">{{ displayedActiveIncidents() }}</span>
+          <span class="trend down">-8%</span>
         </div>
-        <div class="metric-card info" (click)="setView('vulnerabilities')">
-          <div class="metric-header"><span class="metric-icon">🔵</span><h4>Vulnerabilities</h4></div>
-          <div class="metric-value"><span class="value">156</span><span class="trend up">+5%</span></div>
-          <div class="metric-footer"><span class="metric-label">Unpatched systems</span></div>
-        </div>
-        <div class="metric-card success" (click)="setView('compliance')">
-          <div class="metric-header"><span class="metric-icon">🟢</span><h4>Systems Protected</h4></div>
-          <div class="metric-value"><span class="value">1,247</span><span class="trend neutral">0%</span></div>
-          <div class="metric-footer"><span class="metric-label">Network devices</span></div>
-        </div>
+        <div class="metric-footer"><span class="metric-label">Requiring attention</span></div>
+        <div class="metric-glow g-warning"></div>
       </div>
 
-      <div class="charts-grid">
-        <div class="chart-card large">
-          <div class="card-header">
-            <h3>Threat Activity Timeline</h3>
-            <div class="chart-controls">
-              <button class="chart-btn active">24H</button>
-              <button class="chart-btn">7D</button>
-              <button class="chart-btn">30D</button>
-            </div>
-          </div>
-          <div class="chart-container">
-            <canvas id="threatTimelineChart"></canvas>
-          </div>
+      <div class="metric-card info" (click)="setView('vulnerabilities')" id="metric-vulnerabilities" tabindex="0"
+        role="button">
+        <div class="metric-card-bg"></div>
+        <div class="metric-header">
+          <span class="metric-icon">◇</span>
+          <h4>Vulnerabilities</h4>
         </div>
-
-        <div class="chart-card medium">
-          <div class="card-header"><h3>Attack Sources</h3></div>
-          <div class="attack-sources">
-            <div class="source-item">
-              <span class="country-flag">🇨🇳</span>
-              <span class="country-name">China</span>
-              <div class="source-bar"><div class="bar-fill" style="width: 78%"></div></div>
-              <span class="source-count">2,847</span>
-            </div>
-            <div class="source-item">
-              <span class="country-flag">🇷🇺</span>
-              <span class="country-name">Russia</span>
-              <div class="source-bar"><div class="bar-fill" style="width: 65%"></div></div>
-              <span class="source-count">2,341</span>
-            </div>
-          </div>
+        <div class="metric-value">
+          <span class="value">{{ displayedVulnerabilities() }}</span>
+          <span class="trend up">+5%</span>
         </div>
+        <div class="metric-footer"><span class="metric-label">Unpatched systems</span></div>
+        <div class="metric-glow g-info"></div>
       </div>
 
-      <div class="dual-section">
-        <div class="section-card">
-          <div class="card-header">
-            <h3>Recent Security Incidents</h3>
-            <button class="view-all-btn" (click)="setView('incidents')">View All →</button>
-          </div>
-          <div class="incidents-list">
-            @for (inc of incidents().slice(0, 5); track inc.id) {
-              <div class="incident-item" [class]="inc.severity" (click)="openIncident(inc)">
-                <div class="incident-header">
-                  <span class="incident-title">{{inc.type}}</span>
-                  <span class="incident-time">{{inc.time}}</span>
-                </div>
-                <p class="incident-description">{{inc.id}}: {{inc.description}}</p>
-              </div>
+      <div class="metric-card success" (click)="setView('compliance')" id="metric-systems-protected" tabindex="0"
+        role="button">
+        <div class="metric-card-bg"></div>
+        <div class="metric-header">
+          <span class="metric-icon">◆</span>
+          <h4>Systems Protected</h4>
+        </div>
+        <div class="metric-value">
+          <span class="value">{{ displayedSystemsProtected().toLocaleString() }}</span>
+          <span class="trend neutral">0%</span>
+        </div>
+        <div class="metric-footer"><span class="metric-label">Network endpoints</span></div>
+        <div class="metric-glow g-success"></div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+
+      <!-- Threat Timeline -->
+      <div class="chart-card large">
+        <div class="card-header">
+          <h3>Threat Activity Timeline</h3>
+          <div class="chart-controls">
+            @for (r of ['24H', '7D', '30D']; track r) {
+            <button class="chart-btn" [class.active]="chartTimeRange() === r" (click)="setChartRange(r)">{{ r
+              }}</button>
             }
           </div>
         </div>
+        <div class="chart-container">
+          <canvas id="threatTimelineChart"></canvas>
+        </div>
+      </div>
 
-        <div class="section-card">
-          <div class="card-header">
-            <h3>Network Traffic Monitor</h3>
-            <span class="live-indicator">🔴 LIVE</span>
+      <!-- Threat Distribution Donut -->
+      <div class="chart-card medium">
+        <div class="card-header">
+          <h3>Threat Distribution</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="threatDistChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Dual Section -->
+    <div class="dual-section">
+
+      <!-- Recent Incidents -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Recent Security Incidents</h3>
+          <button class="view-all-btn" (click)="setView('incidents')" id="btn-view-all-incidents">View All →</button>
+        </div>
+        <div class="incidents-list">
+          @for (inc of incidents().slice(0, 5); track inc.id) {
+          <div class="incident-item" [class]="inc.severity" (click)="openIncident(inc)" tabindex="0" role="button">
+            <div class="incident-header">
+              <span class="incident-title">{{ inc.type }}</span>
+              <span class="incident-time">{{ inc.time }}</span>
+            </div>
+            <p class="incident-description">{{ inc.id }} — {{ inc.description | slice:0:80 }}...</p>
+            @if (inc.assignee) {
+            <span class="incident-assignee">👤 {{ inc.assignee }}</span>
+            }
           </div>
-          <div class="traffic-visualization">
-             <canvas id="networkTrafficChart"></canvas>
+          }
+        </div>
+      </div>
+
+      <!-- Network Traffic -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Network Traffic Monitor</h3>
+          <span class="live-indicator"><span class="live-dot"></span>LIVE</span>
+        </div>
+        <div class="traffic-visualization">
+          <canvas id="networkTrafficChart"></canvas>
+        </div>
+        <div class="traffic-stats">
+          <div class="stat-item">
+            <span class="stat-label">Inbound</span>
+            <span class="stat-value">2.4 GB/s</span>
           </div>
-          <div class="traffic-stats">
-            <div class="stat-item"><span class="stat-label">Inbound</span><span class="stat-value">2.4 GB/s</span></div>
-            <div class="stat-item"><span class="stat-label">Outbound</span><span class="stat-value">1.8 GB/s</span></div>
-            <div class="stat-item"><span class="stat-label">Blocked</span><span class="stat-value">347 MB/s</span></div>
+          <div class="stat-item">
+            <span class="stat-label">Outbound</span>
+            <span class="stat-value">1.8 GB/s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Blocked</span>
+            <span class="stat-value" style="color: var(--color-danger)">347 MB/s</span>
           </div>
         </div>
       </div>
 
+    </div>
+
+    <!-- Attack Sources + Terminal -->
+    <div class="dual-section">
+
+      <!-- Attack Sources -->
+      <div class="section-card">
+        <div class="card-header">
+          <h3>Top Attack Sources</h3>
+          <span class="live-indicator"><span class="live-dot"></span>LIVE</span>
+        </div>
+        <div class="attack-sources">
+          @for (src of attackSources(); track src.country) {
+          <div class="source-item">
+            <span class="country-flag">{{ src.flag }}</span>
+            <span class="country-name">{{ src.country }}</span>
+            <div class="source-bar">
+              <div class="bar-fill" [style.width.%]="src.percent"></div>
+            </div>
+            <span class="source-count">{{ src.count.toLocaleString() }}</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Live Log Terminal -->
       <div class="terminal-card">
         <div class="terminal-header">
           <div class="terminal-controls">
@@ -179,265 +278,409 @@
             <span class="control-dot yellow"></span>
             <span class="control-dot green"></span>
           </div>
-          <div class="terminal-title">cybershield_soc_v2.0.0 -- angular_host -- (80x24)</div>
+          <div class="terminal-title">cybershield_soc_v3.0.0 — siem_engine — (120x30)</div>
+          <span class="live-indicator"><span class="live-dot"></span>LIVE</span>
         </div>
         <div class="terminal-body" #systemTerminal>
-          @for (log of logs(); track log.timestamp) {
-            <div class="log-line">
-              <span class="log-timestamp">[{{log.timestamp}}]</span>
-              <span class="log-tag" [class]="log.level">{{log.level.toUpperCase()}}</span>
-              <span class="log-message">{{log.msg}}</span>
-            </div>
+          @if (logs().length === 0) {
+          <div class="log-line"><span class="log-timestamp">[--:--:--]</span><span class="log-tag info">INFO</span><span
+              class="log-message">Initialising SIEM event stream...</span></div>
+          }
+          @for (log of logs(); track log.timestamp + log.msg) {
+          <div class="log-line">
+            <span class="log-timestamp">[{{ log.timestamp }}]</span>
+            <span class="log-tag" [class]="log.level">{{ log.level.toUpperCase() }}</span>
+            @if (log.source) {
+            <span class="log-source">{{ log.source }}</span>
+            }
+            <span class="log-message">{{ log.msg }}</span>
+          </div>
           }
         </div>
       </div>
-    </section>
+
+    </div>
+  </section>
   }
 
-  <!-- Threats View -->
+  <!-- ═══════════════════════════
+       THREATS VIEW
+       ═══════════════════════════ -->
   @if (currentView() === 'threats') {
-    <section class="view active">
-      <div class="view-header"><h2>Threat Intelligence Center</h2></div>
-      <div class="threats-table-container">
-        <table class="threats-table">
-          <thead>
-            <tr>
-              <th>Threat ID</th>
-              <th>Type</th>
-              <th>Severity</th>
-              <th>Source IP</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (threat of threats(); track threat.id) {
-              <tr>
-                <td style="color: var(--color-primary)">{{threat.id}}</td>
-                <td>{{threat.type}}</td>
-                <td><span class="severity-badge" [class]="threat.severity">{{threat.severity}}</span></td>
-                <td>{{threat.source}}</td>
-                <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{threat.status}}</span></td>
-                <td><button class="table-action-btn" (click)="performThreatAction(threat)">Action</button></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+  <section class="view" id="view-threats">
+    <div class="view-header">
+      <h2>⚡ Threat Intelligence Center</h2>
+      <div style="display:flex; gap: 0.75rem;">
+        <span class="live-indicator"><span class="live-dot"></span>{{ threats().length }} Active Threats</span>
+        <button class="action-btn primary" (click)="showToast('Refreshing threat feed...','info','📡')"
+          id="btn-refresh-threats">Refresh Feed</button>
       </div>
-    </section>
+    </div>
+
+    <div class="threats-table-container">
+      <table class="threats-table" aria-label="Active Threats">
+        <thead>
+          <tr>
+            <th>Threat ID</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Source IP</th>
+            <th>Target</th>
+            <th>Vector</th>
+            <th>Detected</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (threat of threats(); track threat.id) {
+          <tr>
+            <td class="threat-id-cell">{{ threat.id }}</td>
+            <td>{{ threat.type }}</td>
+            <td><span class="severity-badge" [class]="threat.severity">{{ threat.severity }}</span></td>
+            <td class="mono-cell">{{ threat.source }}</td>
+            <td>{{ threat.target }}</td>
+            <td class="mono-cell small-text">{{ threat.attackVector }}</td>
+            <td class="mono-cell small-text">{{ threat.detected }}</td>
+            <td><span class="status-badge" [class]="threat.status.toLowerCase()">{{ threat.status }}</span></td>
+            <td><button class="table-action-btn" (click)="performThreatAction(threat)"
+                [id]="'action-' + threat.id">Analyse</button></td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
   }
 
-  <!-- Incidents View -->
+  <!-- ═══════════════════════════
+       INCIDENTS — KANBAN
+       ═══════════════════════════ -->
   @if (currentView() === 'incidents') {
-    <section class="view active">
-      <div class="view-header"><h2>Incident Response (Kanban)</h2></div>
-      <div class="incidents-kanban">
-        @for (status of ['detected', 'investigating', 'containing', 'resolved']; track status) {
-          <div class="kanban-column">
-            <div class="column-header" [class]="status">
-              <h4 style="text-transform: capitalize;">{{status}}</h4>
-              <span class="count">{{getIncidentsByStatus(status).length}}</span>
+  <section class="view" id="view-incidents">
+    <div class="view-header">
+      <h2>🔥 Incident Response</h2>
+      <span class="live-indicator"><span class="live-dot"></span>{{ incidents().length }} Tracked</span>
+    </div>
+    <div class="incidents-kanban">
+      @for (status of ['detected', 'investigating', 'containing', 'resolved']; track status) {
+      <div class="kanban-column">
+        <div class="column-header" [class]="status">
+          <h4>{{ status }}</h4>
+          <span class="count">{{ getIncidentsByStatus(status).length }}</span>
+        </div>
+        <div class="column-body">
+          @for (inc of getIncidentsByStatus(status); track inc.id) {
+          <div class="kanban-card" [class]="inc.severity">
+            <div (click)="openIncident(inc)" style="cursor:pointer">
+              <div class="kanban-card-header">
+                <span class="kanban-card-id">{{ inc.id }}</span>
+                <span class="severity-badge" [class]="inc.severity">{{ inc.severity }}</span>
+              </div>
+              <div class="kanban-card-title">{{ inc.type }}</div>
+              <div class="kanban-card-time">🕐 {{ inc.time }}</div>
             </div>
-            <div class="column-body">
-              @for (inc of getIncidentsByStatus(status); track inc.id) {
-                <div class="kanban-card">
-                  <div (click)="openIncident(inc)">
-                    <div class="kanban-card-header">
-                      <span class="kanban-card-id">{{inc.id}}</span>
-                      <span class="severity-badge" [class]="inc.severity">{{inc.severity}}</span>
-                    </div>
-                    <div class="kanban-card-title">{{inc.type}}</div>
-                  </div>
-                  
-                  <div class="kanban-card-actions">
-                    @if (status === 'detected') {
-                      <button (click)="updateIncidentStatus(inc.id, 'investigating')">Investigate →</button>
-                    }
-                    @if (status === 'investigating') {
-                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'detected')">← Reset</button>
-                      <button (click)="updateIncidentStatus(inc.id, 'containing')">Contain →</button>
-                    }
-                    @if (status === 'containing') {
-                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'investigating')">← Back</button>
-                      <button (click)="updateIncidentStatus(inc.id, 'resolved')">Resolve 🗸</button>
-                    }
-                    @if (status === 'resolved') {
-                      <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'containing')">← Reopen</button>
-                    }
-                  </div>
-                </div>
+            <div class="kanban-card-actions">
+              @if (status === 'detected') {
+              <button (click)="updateIncidentStatus(inc.id, 'investigating')">Investigate →</button>
+              }
+              @if (status === 'investigating') {
+              <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'detected')">← Reset</button>
+              <button (click)="updateIncidentStatus(inc.id, 'containing')">Contain →</button>
+              }
+              @if (status === 'containing') {
+              <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'investigating')">← Back</button>
+              <button (click)="updateIncidentStatus(inc.id, 'resolved')">Resolve ✓</button>
+              }
+              @if (status === 'resolved') {
+              <button class="back-btn" (click)="updateIncidentStatus(inc.id, 'containing')">← Reopen</button>
               }
             </div>
           </div>
-        }
+          }
+          @if (getIncidentsByStatus(status).length === 0) {
+          <div class="kanban-empty">
+            <span>✓ No {{ status }} incidents</span>
+          </div>
+          }
+        </div>
       </div>
-    </section>
+      }
+    </div>
+  </section>
   }
 
-  <!-- Vulnerabilities View -->
+  <!-- ═══════════════════════════
+       VULNERABILITIES VIEW
+       ═══════════════════════════ -->
   @if (currentView() === 'vulnerabilities') {
-    <section class="view active">
-      <div class="view-header"><h2>Vulnerability Assessment</h2></div>
-      <div class="vulnerabilities-list">
-        @for (vuln of vulnerabilities(); track vuln.id) {
-          <div class="vuln-item" [class]="vuln.severity">
-            <div class="vuln-item-header">
-              <h3 class="vuln-title">{{vuln.title}}</h3>
-              <span class="vuln-cve">{{vuln.id}}</span>
-            </div>
-            <p class="vuln-description">{{vuln.description}}</p>
-            <div class="vuln-footer">
-              <span>CVSS: <strong style="color: var(--color-danger)">{{vuln.score}}</strong></span>
-              <span>Systems: {{vuln.systems}}</span>
-            </div>
+  <section class="view" id="view-vulnerabilities">
+    <div class="view-header">
+      <h2>🔓 Vulnerability Assessment</h2>
+      <div style="display:flex; align-items:center; gap:1rem;">
+        @if (isScannerActive()) {
+        <div class="scan-progress-wrap">
+          <span class="scan-label">Scanning... {{ scanProgress().toFixed(0) }}%</span>
+          <div class="scan-bar">
+            <div class="scan-fill" [style.width.%]="scanProgress()"></div>
           </div>
+        </div>
         }
+        <button class="action-btn primary" (click)="runScan()" [disabled]="isScannerActive()" id="btn-run-scan">
+          {{ isScannerActive() ? '⟳ Scanning...' : '⬡ Run Full Scan' }}
+        </button>
       </div>
-    </section>
+    </div>
+    <div class="vulnerabilities-list">
+      @for (vuln of vulnerabilities(); track vuln.id) {
+      <div class="vuln-item" [class]="vuln.severity">
+        <div class="vuln-item-header">
+          <h3 class="vuln-title">{{ vuln.title }}</h3>
+          <span class="vuln-cve">{{ vuln.id }}</span>
+        </div>
+        <p class="vuln-description">{{ vuln.description }}</p>
+        <div class="vuln-footer">
+          <span>CVSS: <strong style="color: var(--color-danger)">{{ vuln.score }}/10</strong></span>
+          <span>Affected Systems: <strong>{{ vuln.systems }}</strong></span>
+          @if (vuln.patch) {
+          <span>Patch: <strong style="color:var(--color-success)">{{ vuln.patch }}</strong></span>
+          }
+          <span class="severity-badge" [class]="vuln.severity">{{ vuln.severity }}</span>
+        </div>
+      </div>
+      }
+    </div>
+  </section>
   }
-  <!-- Compliance View -->
-  @if (currentView() === 'compliance') {
-    <section class="view active">
-      <div class="view-header">
-        <h2>Compliance & Reporting</h2>
-        <button class="action-btn primary" (click)="generateReport()">Generate Report</button>
-      </div>
 
-      <div class="compliance-frameworks">
-        @for (framework of complianceFrameworks(); track framework.name) {
-          <div class="framework-card">
-            <div class="framework-header">
-              <h3>{{framework.name}}</h3>
-              <span class="compliance-score">{{framework.score}}%</span>
-            </div>
-            <div class="compliance-bar">
-              <div class="compliance-fill" [style.width.%]="framework.score"></div>
-            </div>
-            <p class="framework-status">{{framework.status}}</p>
-          </div>
-        }
+  <!-- ═══════════════════════════
+       DARKNET MONITOR VIEW (NEW)
+       ═══════════════════════════ -->
+  @if (currentView() === 'darknet') {
+  <section class="view" id="view-darknet">
+    <div class="view-header">
+      <h2>👁 Darknet Monitor</h2>
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <span class="darknet-live-badge"><span class="live-dot"></span>MONITORING ACTIVE</span>
+        <button class="action-btn primary" (click)="showToast('Scanning darknet sources...','info','👁')"
+          id="btn-darknet-scan">Refresh Intel</button>
       </div>
-    </section>
+    </div>
+
+    <div class="darknet-alert-banner">
+      <span class="darknet-alert-icon">⚠</span>
+      <div>
+        <strong>{{ criticalDarknetCount() }}</strong> Critical Threats detected across
+        monitored dark web forums and marketplaces.
+        Immediate action required for DN-001 and DN-005.
+      </div>
+    </div>
+
+    <div class="darknet-grid">
+      @for (item of darknetFeed(); track item.id) {
+      <div class="darknet-card" [class]="item.risk">
+        <div class="darknet-card-header">
+          <div class="darknet-card-meta">
+            <span class="darknet-id">{{ item.id }}</span>
+            <span class="darknet-type-badge">{{ item.type }}</span>
+          </div>
+          <span class="status-badge" [class]="item.status">{{ item.status }}</span>
+        </div>
+        <p class="darknet-description">{{ item.description }}</p>
+        <div class="darknet-card-footer">
+          <span class="darknet-time">⏱ Discovered: {{ item.discovered }}</span>
+          <span class="severity-badge" [class]="item.risk">{{ item.risk }}</span>
+        </div>
+        <button class="darknet-action-btn" (click)="showToast('Tracking item ' + item.id + '...', 'warning', '👁')"
+          [id]="'darknet-action-' + item.id">
+          Initiate Takedown
+        </button>
+      </div>
+      }
+    </div>
+  </section>
+  }
+
+  <!-- ═══════════════════════════
+       COMPLIANCE VIEW
+       ═══════════════════════════ -->
+  @if (currentView() === 'compliance') {
+  <section class="view" id="view-compliance">
+    <div class="view-header">
+      <h2>✓ Compliance &amp; Reporting</h2>
+      <button class="action-btn primary" (click)="generateReport()" id="btn-generate-report">Generate Report</button>
+    </div>
+    <div class="compliance-frameworks">
+      @for (framework of complianceFrameworks(); track framework.name) {
+      <div class="framework-card">
+        <div class="framework-header">
+          <h3>{{ framework.name }}</h3>
+          <span class="compliance-score">{{ framework.score }}%</span>
+        </div>
+        <div class="compliance-bar">
+          <div class="compliance-fill" [style.width.%]="framework.score"></div>
+        </div>
+        <div class="compliance-detail">
+          <span class="framework-status">{{ framework.status }}</span>
+          <span class="framework-controls">{{ framework.passed }}/{{ framework.controls }} controls</span>
+        </div>
+      </div>
+      }
+    </div>
+  </section>
   }
 
 </main>
 
-<!-- Incident Modal -->
+<!-- ════════════════════════════════════
+     INCIDENT DETAIL MODAL
+     ════════════════════════════════════ -->
 @if (isModalOpen()) {
-  <div class="modal active">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{{selectedIncident()?.type}} - {{selectedIncident()?.id}}</h3>
-        <button class="close-btn" (click)="closeModal()">✕</button>
+<div class="modal-overlay active" (click)="closeModal()">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-id">{{ selectedIncident()?.id }}</span>
+        <h3>{{ selectedIncident()?.type }}</h3>
       </div>
-      <div class="modal-body">
-        <p><strong>Status:</strong> <span class="status-badge investigating">{{selectedIncident()?.status}}</span></p>
-        <p style="margin: 1rem 0;">{{selectedIncident()?.description}}</p>
-        <div style="display: flex; gap: 1rem;">
-          <button class="action-btn primary" (click)="isolateSystem()">Isolate System</button>
-          <button class="action-btn" (click)="escalateIncident()">Escalate</button>
-        </div>
+      <button class="close-btn" (click)="closeModal()" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-badges">
+        <span class="severity-badge" [class]="selectedIncident()?.severity">{{ selectedIncident()?.severity }}</span>
+        <span class="status-badge" [class]="selectedIncident()?.status">{{ selectedIncident()?.status }}</span>
+      </div>
+      <p class="modal-desc">{{ selectedIncident()?.description }}</p>
+      @if (selectedIncident()?.assignee) {
+      <p class="modal-assignee">👤 Assigned to: <strong>{{ selectedIncident()?.assignee }}</strong></p>
+      }
+      <div class="modal-actions">
+        <button class="action-btn primary" (click)="isolateSystem()" id="btn-isolate-system">🔒 Isolate System</button>
+        <button class="action-btn" (click)="escalateIncident()" id="btn-escalate">📢 Escalate</button>
       </div>
     </div>
   </div>
+</div>
 }
 
-<!-- Notification Panel -->
-<div class="notification-panel" [class.active]="isAlertPanelOpen()">
+<!-- ════════════════════════════════════
+     NOTIFICATION PANEL
+     ════════════════════════════════════ -->
+<div class="notification-panel" [class.active]="isAlertPanelOpen()" id="notification-panel">
   <div class="panel-header">
     <h3>Security Alerts</h3>
-    <button class="clear-btn" (click)="clearNotifications()">Clear All</button>
+    <button class="clear-btn" (click)="clearNotifications()" id="btn-clear-alerts">Clear All</button>
   </div>
   <div class="notifications-list">
     @for (note of notifications(); track note.id) {
-      <div class="notification-item" [class]="note.type">
-        <div class="notification-header">
-          <span class="notification-icon">{{note.type === 'critical' ? '🔴' : '🟡'}}</span>
-          <span class="notification-title">{{note.title}}</span>
-        </div>
-        <div class="notification-body">{{note.message}}</div>
+    <div class="notification-item" [class]="note.type">
+      <div class="notification-header">
+        <span class="notification-icon">{{ note.type === 'critical' ? '⬡' : (note.type === 'warning' ? '◎' : 'ℹ')
+          }}</span>
+        <span class="notification-title">{{ note.title }}</span>
+        @if (note.time) { <span class="notification-time">{{ note.time }}</span> }
       </div>
+      <div class="notification-body">{{ note.message }}</div>
+    </div>
     }
     @if (notifications().length === 0) {
-      <div class="empty-notifications">No new alerts</div>
+    <div class="empty-notifications">✓ No new alerts</div>
     }
   </div>
 </div>
 
-<!-- AI Assistant Sidebar -->
-<div class="ai-sidebar" [class.active]="isAIPanelOpen()">
+<!-- ════════════════════════════════════
+     AI ASSISTANT SIDEBAR
+     ════════════════════════════════════ -->
+<div class="ai-sidebar" [class.active]="isAIPanelOpen()" id="ai-sidebar">
   <div class="ai-header">
     <div class="ai-title">
-      <span class="ai-bot-icon">🤖</span>
+      <div class="ai-avatar">◈</div>
       <div>
         <h3>CyberSentinel AI</h3>
-        <span class="ai-status">Ready to assist</span>
+        <span class="ai-status">v3.0 · Ready to assist</span>
       </div>
     </div>
-    <button class="close-btn" (click)="toggleAI()">✕</button>
+    <button class="close-btn" (click)="toggleAI()" id="ai-close-btn">✕</button>
   </div>
-  
+
   <div class="ai-chat-body" #aiChatBody>
     @for (msg of aiMessages(); track $index) {
-      <div class="chat-message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
-        <div class="message-bubble">{{msg.text}}</div>
-      </div>
+    <div class="chat-message" [class.user]="msg.role === 'user'" [class.bot]="msg.role === 'bot'">
+      @if (msg.role === 'bot') {
+      <span class="chat-avatar">◈</span>
+      }
+      <div class="message-bubble">{{ msg.text }}</div>
+    </div>
     }
+    @if (isAITyping()) {
+    <div class="chat-message bot">
+      <span class="chat-avatar">◈</span>
+      <div class="message-bubble typing-indicator">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    }
+  </div>
+
+  <div class="ai-suggestions">
+    <button (click)="sendAIMessage('Analyze current threat level')" id="ai-suggest-threats">Threat Level</button>
+    <button (click)="sendAIMessage('Summarize latest incidents')" id="ai-suggest-incidents">Incidents</button>
+    <button (click)="sendAIMessage('Check darknet activity')" id="ai-suggest-darknet">Darknet</button>
+    <button (click)="sendAIMessage('Compliance status')" id="ai-suggest-compliance">Compliance</button>
   </div>
 
   <div class="ai-input-area">
-    <input type="text" #aiInput placeholder="Ask CyberSentinel about threats..." (keyup.enter)="sendAIMessage(aiInput.value); aiInput.value = ''">
-    <button class="send-btn" (click)="sendAIMessage(aiInput.value); aiInput.value = ''">⬆️</button>
-  </div>
-  
-  <div class="ai-suggestions">
-    <button (click)="aiInput.value = 'Analyze current threat level'">Analyze Threats</button>
-    <button (click)="aiInput.value = 'Summarize latest incidents'">Recent Incidents</button>
+    <input id="ai-input" type="text" #aiInput placeholder="Ask CyberSentinel AI..."
+      (keyup.enter)="sendAIMessage(aiInput.value); aiInput.value = ''">
+    <button class="send-btn" (click)="sendAIMessage(aiInput.value); aiInput.value = ''" id="ai-send-btn">↑</button>
   </div>
 </div>
 
-<!-- Toast Notifications -->
-<div class="toast-container">
+<!-- ════════════════════════════════════
+     TOAST NOTIFICATIONS
+     ════════════════════════════════════ -->
+<div class="toast-container" aria-live="polite">
   @for (toast of toasts(); track toast.id) {
-    <div class="toast" [class]="toast.type">
-      <span class="toast-icon">{{toast.icon}}</span>
-      <span class="toast-message">{{toast.message}}</span>
-    </div>
+  <div class="toast" [class]="toast.type">
+    <span class="toast-icon">{{ toast.icon }}</span>
+    <span class="toast-message">{{ toast.message }}</span>
+  </div>
   }
 </div>
 
-<!-- Profile Edit Modal -->
+<!-- ════════════════════════════════════
+     PROFILE EDIT MODAL
+     ════════════════════════════════════ -->
 @if (isProfileModalOpen()) {
-  <div class="modal active profile">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Edit Administrator Profile</h3>
-        <button class="close-btn" (click)="toggleProfileModal()">✕</button>
+<div class="modal-overlay active" (click)="toggleProfileModal()">
+  <div class="modal-panel profile" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Edit Administrator Profile</h3>
+      <button class="close-btn" (click)="toggleProfileModal()" id="profile-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="profile-name">Full Name</label>
+        <input id="profile-name" type="text" #nameInput [value]="adminProfile().name" placeholder="Enter name...">
       </div>
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Full Name</label>
-          <input type="text" #nameInput [value]="adminProfile().name" 
-            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
-            placeholder="Enter name...">
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Professional Role</label>
-          <input type="text" #roleInput [value]="adminProfile().role" 
-            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
-            placeholder="e.g. Senior Security Analyst">
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;">Department</label>
-          <input type="text" #deptInput [value]="adminProfile().department" 
-            style="width: 100%; background: var(--color-bg-tertiary); border: 1px solid var(--color-border); color: white; padding: 0.75rem; border-radius: var(--radius-md);" 
-            placeholder="e.g. SOC Team Alpha">
-        </div>
-        <div class="modal-bottom-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
-          <button class="action-btn primary" style="flex: 1;" (click)="saveProfile(nameInput.value, roleInput.value, deptInput.value)">Save Changes</button>
-          <button class="action-btn" style="flex: 1;" (click)="toggleProfileModal()">Cancel</button>
-        </div>
+      <div class="form-group">
+        <label for="profile-role">Professional Role</label>
+        <input id="profile-role" type="text" #roleInput [value]="adminProfile().role"
+          placeholder="e.g. Senior Security Analyst">
+      </div>
+      <div class="form-group">
+        <label for="profile-dept">Department</label>
+        <input id="profile-dept" type="text" #deptInput [value]="adminProfile().department"
+          placeholder="e.g. SOC Team Alpha">
+      </div>
+      <div class="modal-actions">
+        <button class="action-btn primary" style="flex:1"
+          (click)="saveProfile(nameInput.value, roleInput.value, deptInput.value)" id="btn-save-profile">Save
+          Changes</button>
+        <button class="action-btn" style="flex:1" (click)="toggleProfileModal()" id="btn-cancel-profile">Cancel</button>
       </div>
     </div>
   </div>
+</div>
 }
