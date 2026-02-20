@@ -11,16 +11,16 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "baseUrl": "./",
-    "paths": {},
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@angular"
-    ]
+    "moduleResolution": "node",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2022",
+      "dom"
+    ],
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
