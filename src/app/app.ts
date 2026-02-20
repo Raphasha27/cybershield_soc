@@ -30,7 +30,11 @@ export class App implements AfterViewInit, OnDestroy {
   attackSources = this.securityService.attackSources;
 
   // UI State
-  currentView = signal('dashboard');
+  // Auth State
+  isLoggedIn = signal(false);
+  currentView = signal('landing');
+  loginError = signal('');
+  isLoginLoading = signal(false);
   isAlertPanelOpen = signal(false);
   isAIPanelOpen = signal(false);
   isModalOpen = signal(false);
@@ -106,9 +110,43 @@ export class App implements AfterViewInit, OnDestroy {
   }
 
   // === NAVIGATION ===
+  // === NAVIGATION & AUTH ===
   setView(view: string) {
+    if (!this.isLoggedIn() && view !== 'landing' && view !== 'login') {
+      this.currentView.set('login');
+      return;
+    }
     this.currentView.set(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  getStarted() {
+    this.currentView.set('login');
+  }
+
+  login(email: string, pass: string) {
+    if (!email || !pass) {
+      this.showToast('Please enter both email and password', 'error', '✕');
+      return;
+    }
+
+    this.isLoginLoading.set(true);
+    this.loginError.set('');
+
+    // Mock authentication delay
+    setTimeout(() => {
+      this.isLoginLoading.set(false);
+      this.isLoggedIn.set(true);
+      this.currentView.set('dashboard');
+      this.showToast('Authentication successful — Welcome, ' + this.adminProfile().name, 'success', '✓');
+      this.animateCounters(); // Re-animate counters for the logged-in user
+    }, 1500);
+  }
+
+  logout() {
+    this.isLoggedIn.set(false);
+    this.currentView.set('landing');
+    this.showToast('Successfully logged out from SOC network', 'info', '🔓');
   }
 
   // === PANELS ===

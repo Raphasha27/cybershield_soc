@@ -1,14 +1,95 @@
-<!-- ═══════════════════════════════════════════════
-     CYBERSHIELD SOC — ENHANCED TEMPLATE
-     ═══════════════════════════════════════════════ -->
+@if (currentView() === 'landing') {
+<section class="landing-page">
+  <div class="landing-hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-content">
+      <div class="hero-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">CyberShield</span>
+      </div>
+      <h1 class="hero-title">Cloud-Native Security <br><span class="highlight">Intelligence Platform</span></h1>
+      <p class="hero-subtitle">Next-generation SOC operations powered by AI. Real-time threat detection, automated
+        response, and darknet intelligence unified in one premium dashboard.</p>
+      <div class="hero-actions">
+        <button class="action-btn primary large" (click)="getStarted()">Get Started — Deploy SOC</button>
+        <button class="action-btn large" (click)="setView('login')">Operator Login</button>
+      </div>
+      <div class="hero-stats">
+        <div class="landing-stat">
+          <span class="stat-num">99.9%</span>
+          <span class="stat-desc">Threat Neutralization</span>
+        </div>
+        <div class="landing-stat">
+          <span class="stat-num">24/7</span>
+          <span class="stat-desc">Active Monitoring</span>
+        </div>
+        <div class="landing-stat">
+          <span class="stat-num">AI-Driven</span>
+          <span class="stat-desc">Pattern Recognition</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="visual-mock">
+        <div class="mock-header">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div class="mock-body">
+          <div class="mock-line" style="width: 80%"></div>
+          <div class="mock-line" style="width: 60%"></div>
+          <div class="mock-line" style="width: 90%; height: 60px; background: rgba(0,212,255,0.1)"></div>
+          <div class="mock-grid">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+}
 
+@if (currentView() === 'login') {
+<section class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-icon">⬡</div>
+      <h2>Operator Authentication</h2>
+      <p>Access the localized CyberShield SOC network</p>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label for="email">Operator ID / Email</label>
+        <input type="email" id="email" #emailInput value="admin@cybershield.so" placeholder="admin@cybershield.so">
+      </div>
+      <div class="form-group">
+        <label for="password">Security Protocol / Password</label>
+        <input type="password" id="password" #passInput value="••••••••" placeholder="Enter password">
+      </div>
+      <button class="action-btn primary full-width" [disabled]="isLoginLoading()"
+        (click)="login(emailInput.value, passInput.value)">
+        @if (isLoginLoading()) {
+        <span class="loader"></span> Authenticating...
+        } @else {
+        Authorize & Access Terminal
+        }
+      </button>
+    </div>
+    <div class="login-footer">
+      <p>Encrypted Session • RSA-4096 Certified</p>
+    </div>
+  </div>
+</section>
+}
+
+@if (isLoggedIn()) {
+<!-- Existing authenticated content -->
 <!-- HEADER -->
 <header class="header">
   <div class="header-content">
 
     <!-- Logo -->
     <div class="logo-section">
-      <div class="logo-icon-wrap">
+      <div class="logo-icon-wrap" (click)="setView('landing')" style="cursor:pointer">
         <span class="logo-icon">⬡</span>
         <span class="logo-pulse"></span>
       </div>
@@ -54,15 +135,18 @@
         <span class="icon-btn-icon">◈</span>
       </button>
 
-      <button id="profile-btn" class="user-profile-btn" (click)="toggleProfileModal()">
-        <div class="user-profile">
-          <div class="user-avatar">{{ adminProfile().name.charAt(0) }}</div>
-          <div class="user-info">
-            <span class="user-name">{{ adminProfile().name }}</span>
-            <span class="user-role">{{ adminProfile().role }}</span>
+      <div class="profile-group">
+        <button id="profile-btn" class="user-profile-btn" (click)="toggleProfileModal()">
+          <div class="user-profile">
+            <div class="user-avatar">{{ adminProfile().name.charAt(0) }}</div>
+            <div class="user-info">
+              <span class="user-name">{{ adminProfile().name }}</span>
+              <span class="user-role">{{ adminProfile().role }}</span>
+            </div>
           </div>
-        </div>
-      </button>
+        </button>
+        <button class="logout-btn" (click)="logout()" title="Logout"> Logout </button>
+      </div>
     </div>
 
   </div>
@@ -94,13 +178,8 @@
 
 <!-- MAIN CONTENT -->
 <main class="main-content">
-
-  <!-- ═══════════════════════════
-       DASHBOARD VIEW
-       ═══════════════════════════ -->
   @if (currentView() === 'dashboard') {
   <section class="view" id="view-dashboard">
-
     <!-- Metric Cards -->
     <div class="metrics-grid">
       <div class="metric-card critical" (click)="setView('threats')" id="metric-critical-alerts" tabindex="0"
@@ -304,8 +383,8 @@
   }
 
   <!-- ═══════════════════════════
-       THREATS VIEW
-       ═══════════════════════════ -->
+         THREATS VIEW
+         ═══════════════════════════ -->
   @if (currentView() === 'threats') {
   <section class="view" id="view-threats">
     <div class="view-header">
@@ -354,8 +433,8 @@
   }
 
   <!-- ═══════════════════════════
-       INCIDENTS — KANBAN
-       ═══════════════════════════ -->
+         INCIDENTS — KANBAN
+         ═══════════════════════════ -->
   @if (currentView() === 'incidents') {
   <section class="view" id="view-incidents">
     <div class="view-header">
@@ -411,8 +490,8 @@
   }
 
   <!-- ═══════════════════════════
-       VULNERABILITIES VIEW
-       ═══════════════════════════ -->
+         VULNERABILITIES VIEW
+         ═══════════════════════════ -->
   @if (currentView() === 'vulnerabilities') {
   <section class="view" id="view-vulnerabilities">
     <div class="view-header">
@@ -454,8 +533,8 @@
   }
 
   <!-- ═══════════════════════════
-       DARKNET MONITOR VIEW (NEW)
-       ═══════════════════════════ -->
+         DARKNET MONITOR VIEW (NEW)
+         ═══════════════════════════ -->
   @if (currentView() === 'darknet') {
   <section class="view" id="view-darknet">
     <div class="view-header">
@@ -502,8 +581,8 @@
   }
 
   <!-- ═══════════════════════════
-       COMPLIANCE VIEW
-       ═══════════════════════════ -->
+         COMPLIANCE VIEW
+         ═══════════════════════════ -->
   @if (currentView() === 'compliance') {
   <section class="view" id="view-compliance">
     <div class="view-header">
@@ -529,12 +608,11 @@
     </div>
   </section>
   }
-
 </main>
 
 <!-- ════════════════════════════════════
-     INCIDENT DETAIL MODAL
-     ════════════════════════════════════ -->
+       INCIDENT DETAIL MODAL
+       ════════════════════════════════════ -->
 @if (isModalOpen()) {
 <div class="modal-overlay active" (click)="closeModal()">
   <div class="modal-panel" (click)="$event.stopPropagation()">
@@ -564,8 +642,8 @@
 }
 
 <!-- ════════════════════════════════════
-     NOTIFICATION PANEL
-     ════════════════════════════════════ -->
+       NOTIFICATION PANEL
+       ════════════════════════════════════ -->
 <div class="notification-panel" [class.active]="isAlertPanelOpen()" id="notification-panel">
   <div class="panel-header">
     <h3>Security Alerts</h3>
@@ -590,8 +668,8 @@
 </div>
 
 <!-- ════════════════════════════════════
-     AI ASSISTANT SIDEBAR
-     ════════════════════════════════════ -->
+       AI ASSISTANT SIDEBAR
+       ════════════════════════════════════ -->
 <div class="ai-sidebar" [class.active]="isAIPanelOpen()" id="ai-sidebar">
   <div class="ai-header">
     <div class="ai-title">
@@ -638,8 +716,8 @@
 </div>
 
 <!-- ════════════════════════════════════
-     TOAST NOTIFICATIONS
-     ════════════════════════════════════ -->
+       TOAST NOTIFICATIONS
+       ════════════════════════════════════ -->
 <div class="toast-container" aria-live="polite">
   @for (toast of toasts(); track toast.id) {
   <div class="toast" [class]="toast.type">
@@ -650,8 +728,8 @@
 </div>
 
 <!-- ════════════════════════════════════
-     PROFILE EDIT MODAL
-     ════════════════════════════════════ -->
+       PROFILE EDIT MODAL
+       ════════════════════════════════════ -->
 @if (isProfileModalOpen()) {
 <div class="modal-overlay active" (click)="toggleProfileModal()">
   <div class="modal-panel profile" (click)="$event.stopPropagation()">
@@ -683,4 +761,5 @@
     </div>
   </div>
 </div>
+}
 }
