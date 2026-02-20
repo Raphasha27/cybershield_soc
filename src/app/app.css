@@ -990,9 +990,6 @@
 
 .darknet-alert-icon {
     color: var(--color-critical);
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    animation: alertBlink 1.5s ease-in-out infinite;
 }
 
 @keyframes alertBlink {
@@ -1007,115 +1004,125 @@
     }
 }
 
-.darknet-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: var(--spacing-lg);
-}
-
-.darknet-card {
-    background: var(--color-bg-card);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-lg);
-    transition: all var(--transition-base);
+/* ─── CYBER MAP VISUALIZATION ────────────── */
+.cyber-map-container {
     position: relative;
+    width: 100%;
+    height: 300px;
+    background: radial-gradient(circle at center, #0a192f 0%, #020812 100%);
+    border-radius: 8px;
     overflow: hidden;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
 }
 
-.darknet-card::before {
+.map-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.map-node {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+}
+
+.map-node.pulse::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
+    inset: -10px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    animation: mapPulse 2s infinite;
 }
 
-.darknet-card.critical::before {
-    background: var(--color-critical);
+@keyframes mapPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
 }
 
-.darknet-card.high::before {
-    background: var(--color-danger);
+.map-connection {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.3;
+    transform-origin: left center;
 }
 
-.darknet-card.medium::before {
-    background: var(--color-warning);
+/* ─── COMM SHIELD PULSE ──────────────────── */
+.shield-pulse-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 20px;
 }
 
-.darknet-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-border-bright);
+.shield-circle {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0.2;
 }
 
-.darknet-card-header {
+.shield-circle:nth-child(2) {
+    inset: 20px;
+    border-color: var(--accent2);
+    animation: orbit 10s linear infinite;
+}
+
+.shield-circle:nth-child(3) {
+    inset: 40px;
+    border-color: var(--purple);
+    animation: orbit 15s linear reverse infinite;
+}
+
+.shield-core {
+    position: absolute;
+    inset: 60px;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    border-radius: 50%;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 0.75rem;
-}
-
-.darknet-card-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.darknet-id {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--color-text-muted);
-}
-
-.darknet-type-badge {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-}
-
-.darknet-description {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-}
-
-.darknet-card-footer {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    justify-content: center;
+    font-size: 40px;
+    animation: coreGlow 2s ease-in-out infinite alternate;
 }
 
-.darknet-time {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
+@keyframes orbit {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.darknet-action-btn {
-    width: 100%;
-    padding: 0.5rem;
-    background: var(--color-critical-dim);
-    border: 1px solid rgba(255, 0, 51, 0.3);
-    border-radius: var(--radius-md);
-    color: var(--color-critical);
-    font-size: 0.8rem;
-    font-weight: 700;
-    font-family: var(--font-primary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
+@keyframes coreGlow {
+    from {
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        transform: scale(1);
+    }
 
-.darknet-action-btn:hover {
-    background: var(--color-critical);
-    color: white;
-    box-shadow: 0 0 15px rgba(255, 0, 51, 0.4);
+    to {
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+        transform: scale(1.1);
+    }
 }
 
 /* ─── COMPLIANCE EXTRAS ──────────────────── */
