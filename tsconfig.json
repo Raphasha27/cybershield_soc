@@ -12,18 +12,8 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "baseUrl": ".",
-    "paths": {
-      "@angular/core": [
-        "node_modules/@angular/core/types/core.d.ts"
-      ],
-      "@angular/common": [
-        "node_modules/@angular/common/types/common.d.ts"
-      ],
-      "tslib": [
-        "node_modules/tslib/tslib.d.ts"
-      ]
-    },
+    "baseUrl": "./",
+    "paths": {},
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",

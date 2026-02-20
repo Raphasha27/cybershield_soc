@@ -1,6 +1,6 @@
 import { Component, signal, effect, ElementRef, ViewChild, AfterViewInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SecurityService, Incident } from './security.service';
+import { SecurityService, Incident, EnterpriseDevice } from './security.service';
 
 declare var Chart: any;
 
@@ -164,7 +164,7 @@ export class App implements AfterViewInit, OnDestroy {
   initDeviceSimulations() {
     const id = setInterval(() => {
       // Simulate location drift for fleet
-      this.enterpriseDevices().forEach(dev => {
+      this.enterpriseDevices().forEach((dev: EnterpriseDevice) => {
         if (dev.location) {
           dev.location.lat += (Math.random() - 0.5) * 0.001;
           dev.location.lng += (Math.random() - 0.5) * 0.001;
@@ -283,7 +283,7 @@ export class App implements AfterViewInit, OnDestroy {
   // === SYSTEM CHECKUP & ML ===
   updateCheckupForm(field: string, event: Event) {
     const val = (event.target as HTMLInputElement).value;
-    this.checkupForm.update(f => ({ ...f, [field]: val }));
+    this.checkupForm.update((f: any) => ({ ...f, [field]: val }));
   }
 
   runPersonalCheckup() {
