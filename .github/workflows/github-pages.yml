@@ -1,6 +1,8 @@
 name: Deploy to GitHub Pages
 
 on:
+  workflow_dispatch:
+
   push:
     branches: [ master ]
 
@@ -15,7 +17,9 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on:
+  workflow_dispatch:
+ ubuntu-latest
     
     steps:
     - name: Checkout
@@ -24,7 +28,9 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version:
+  workflow_dispatch:
+ '18'
         cache: 'npm'
 
     - name: Install dependencies
@@ -45,7 +51,9 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on:
+  workflow_dispatch:
+ ubuntu-latest
     needs: build
     
     steps:
