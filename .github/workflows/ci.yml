@@ -15,7 +15,8 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: - name: Install dependencies
+        node-version: -
+    name: Install dependencies
       run: npm install --legacy-peer-deps
 
     - name: Build Angular App
@@ -24,7 +25,8 @@ jobs:
     NODE_OPTIONS: --max_old_space_size=4096
   security_scan: 
     name: Security Scan (Trivy)
-    runs-on: - uses: actions/checkout@v4
+    runs-on: -
+    uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
